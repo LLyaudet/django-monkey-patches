@@ -1,0 +1,33 @@
+# pyproject.toml
+
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "django-monkey-patches"
+version = "1.0.0"
+description = "Add monkey-patches to correct and enhance your favorite framework"
+readme = "README.md"
+authors = [
+    { name = "Laurent Lyaudet", email = "laurent.lyaudet@gmail.com" },
+]
+license = { file = "COPYING.LESSER" }
+classifiers = [
+    "License :: OSI Approved :: LGPL 3",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["Django", "monkey-patch"]
+dependencies = [
+]
+requires-python = ">=3.0"
+
+[project.optional-dependencies]
+dev = ["black"]
+
+[project.urls]
+"Homepage" = "https://github.com/LLyaudet/django-monkey-patches"
+"Bug Tracker" = "https://github.com/LLyaudet/django-monkey-patches/issues"
+
