@@ -1,0 +1,12 @@
+COPYING
+COPYING.LESSER
+README.md
+pyproject.toml
+src/django_monkey_patches/__init__.py
+src/django_monkey_patches/django__query_set__get.py
+src/django_monkey_patches/django__query_set__get_or_create.py
+src/django_monkey_patches.egg-info/PKG-INFO
+src/django_monkey_patches.egg-info/SOURCES.txt
+src/django_monkey_patches.egg-info/dependency_links.txt
+src/django_monkey_patches.egg-info/requires.txt
+src/django_monkey_patches.egg-info/top_level.txt
