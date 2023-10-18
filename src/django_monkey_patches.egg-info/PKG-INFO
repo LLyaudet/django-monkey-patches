@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: django-monkey-patches
-Version: 1.0.1
+Version: 1.1.0
 Summary: Add monkey-patches to correct and enhance your favorite framework
 Author-email: Laurent Lyaudet <laurent.lyaudet@gmail.com>
 License:                    GNU LESSER GENERAL PUBLIC LICENSE

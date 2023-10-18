@@ -5,6 +5,7 @@ pyproject.toml
 src/django_monkey_patches/__init__.py
 src/django_monkey_patches/django__query_set__get.py
 src/django_monkey_patches/django__query_set__get_or_create.py
+src/django_monkey_patches/django_rest_framework__field__get_request.py
 src/django_monkey_patches.egg-info/PKG-INFO
 src/django_monkey_patches.egg-info/SOURCES.txt
 src/django_monkey_patches.egg-info/dependency_links.txt
