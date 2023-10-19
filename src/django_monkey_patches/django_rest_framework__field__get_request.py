@@ -35,12 +35,18 @@ def get_request_query_params(self):
     request = self.context.get("request", None)
     if request is None:
         return {}
+    if not hasattr(request, "query_params"):
+        # True story, you may have a code base where, sometimes,
+        # a Django HttpRequest is given instead of a DRF Request
+        # to the context of the serializer.
+        # (This is not an use of the serializer in a DRF view.)
+        return request.GET
     return request.query_params
 
 
 def get_request_data(self):
     request = self.context.get("request", None)
-    if request is None:
+    if request is None or not hasattr(request, "data"):
         return {}
     return request.data
 
@@ -53,15 +59,15 @@ def get_request_POST(self):
 
 
 def get_one_request_query_param(self, key, default=None):
-    return self.get_request_query_params.get(key, default=default)
+    return self.get_request_query_params().get(key, default=default)
 
 
 def get_one_request_datum(self, key, default=None):
-    return self.get_request_data.get(key, default=default)
+    return self.get_request_data().get(key, default=default)
 
 
 def get_one_request_POST_datum(self, key, default=None):
-    return self.get_request_POST.get(key, default=default)
+    return self.get_request_POST().get(key, default=default)
 
 
 def apply_get_request_patch_v1():
