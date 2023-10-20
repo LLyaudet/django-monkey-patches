@@ -59,15 +59,15 @@ def get_request_POST(self):
 
 
 def get_one_request_query_param(self, key, default=None):
-    return self.get_request_query_params().get(key, default=default)
+    return self.get_request_query_params().get(key, default)
 
 
 def get_one_request_datum(self, key, default=None):
-    return self.get_request_data().get(key, default=default)
+    return self.get_request_data().get(key, default)
 
 
 def get_one_request_POST_datum(self, key, default=None):
-    return self.get_request_POST().get(key, default=default)
+    return self.get_request_POST().get(key, default)
 
 
 def apply_get_request_patch_v1():
