@@ -45,6 +45,6 @@ def patched_get_v1(self, *args, **kwargs):
     return result
 
 
-def apply_patched_get_or_create_v1():
+def apply_patched_get_v1():
     QuerySet.get = patched_get_v1
     return original_get
