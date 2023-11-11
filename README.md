@@ -1,6 +1,8 @@
 # django-monkey-patches
 
-A collection of monkey patches to improve Django framework
+[![pypi-version]][pypi]
+
+**A collection of monkey patches to improve Django framework**
 
 
 ## Use
@@ -44,3 +46,5 @@ See previous question.
 
 See previous question.
 
+[pypi-version]: https://img.shields.io/pypi/v/django-monkey-patches.svg
+[pypi]: https://pypi.org/project/django-monkey-patches/
