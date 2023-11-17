@@ -24,7 +24,22 @@ The topic is complex,
 because you may end up having tests
 where most of the time is spent on the same cache filling over and over.
 But the good news is that you can apply or not this patch at will.
-Make sure you call super().tearDown() in your custom tearDown() methods.
+
+/!\/!\/!\ cache.clear() can do a lot of harm
+if you have a cache infrastructure shared between your test environment
+and your production environment,
+or shared between your Django application and another application.
+As the Django doc states at https://docs.djangoproject.com/en/dev/topics/cache/ :
+> Finally, if you want to delete all the keys in the cache, use cache.clear().
+> Be careful with this; clear() will remove everything from the cache,
+> not just the keys set by your application.
+Better solutions exist by searching for cache keys with some prefix,
+and then using cache.delete_many().
+But there is no uniform way yet, across cache backends,
+to get cache keys with some prefix.
+See : https://stackoverflow.com/questions/9048257/get-list-of-cache-keys-in-django
+
+/!\ Make sure you call super().tearDown() in your custom tearDown() methods.
 """
 from django.core.cache import cache
 from django.test import TestCase
