@@ -37,15 +37,29 @@ Better solutions exist by searching for cache keys with some prefix,
 and then using cache.delete_many().
 But there is no uniform way yet, across cache backends,
 to get cache keys with some prefix.
-See : https://stackoverflow.com/questions/9048257/get-list-of-cache-keys-in-django
+See:
+https://stackoverflow.com/questions/9048257/get-list-of-cache-keys-in-django
+For this solution and Redis,
+you will have to choose v2 and modify your caches settings
+according to your use case.
 
 /!\ Make sure you call super().tearDown() in your custom tearDown() methods.
 """
-from django.core.cache import cache
+import os
+from typing import Dict
+
+from django.conf import settings
+from django.core.cache import cache, caches
 from django.test import TestCase
 
+from .django__base_cache__make_cache_key import (
+    make_test_cache_key,
+    make_parallel_test_cache_key,
+)
 
-# No original tearDown method
+
+# This function is a noop (pass).
+original_tearDown = TestCase.tearDown
 
 
 def patched_tear_down_v1(self, *args, **kwargs):
@@ -54,3 +68,110 @@ def patched_tear_down_v1(self, *args, **kwargs):
 
 def apply_patched_tear_down_v1():
     TestCase.tearDown = patched_tear_down_v1
+
+
+def patched_tear_down_v2(self, *args, **kwargs):
+    """
+    This is the most flexible patch
+    where you can define on a per cache basis
+    the function you want to apply to clear the cache.
+    The code of 4 possible callback functions is given after.
+    """
+    for cache_alias, cache_settings in settings.CACHES.items():
+        test_clear_cache_callback = cache_settings.get(
+            "TEST_CLEAR_CACHE_CALLBACK",
+        )
+        if test_clear_cache_callback is not None:
+            test_clear_cache_callback(
+                cache_alias,
+                cache_settings,
+                caches[cache_alias],
+            )
+
+
+def apply_patched_tear_down_v2():
+    TestCase.tearDown = patched_tear_down_v2
+
+
+def test_clear_cache_callback_v1(
+    cache_alias: str,
+    cache_settings: Dict,
+    current_cache,
+):
+    """Probably not the best option"""
+    current_cache.clear()
+
+
+def test_clear_cache_callback_v2(
+    cache_alias: str,
+    cache_settings: Dict,
+    current_cache,
+):
+    """
+    A nice possibility with Redis.
+    See https://stackoverflow.com/a/55633767/5796086
+    CC BY SA 4.0
+    and see make_test_cache_key(), make_parallel_test_cache_key()
+    in this package.
+    """
+    key_function = cache_settings.get("KEY_FUNCTION")
+    key_prefix = cache_settings.get("KEY_PREFIX", "")
+    if key_function is make_test_cache_key:
+        query_key_prefix = f"test_cache:{key_prefix}:*"
+    elif key_function is make_parallel_test_cache_key:
+        query_key_prefix = f"test_cache{os.getpid()}:{key_prefix}:*"
+    else:
+        return
+    cache_keys = current_cache.keys(query_key_prefix)
+    if len(cache_keys) > 0:
+        current_cache.delete_many(cache_keys)
+
+
+def test_clear_cache_callback_v3(
+    cache_alias: str,
+    cache_settings: Dict,
+    current_cache,
+):
+    """
+    Another possibility with other versions of Redis.
+    See https://stackoverflow.com/a/71698532/5796086
+    CC BY SA 4.0
+    and see make_test_cache_key(), make_parallel_test_cache_key()
+    in this package.
+    """
+    key_function = cache_settings.get("KEY_FUNCTION")
+    key_prefix = cache_settings.get("KEY_PREFIX", "")
+    if key_function is make_test_cache_key:
+        query_key_prefix = f"test_cache:{key_prefix}:*"
+    elif key_function is make_parallel_test_cache_key:
+        query_key_prefix = f"test_cache{os.getpid()}:{key_prefix}:*"
+    else:
+        return
+    cache_keys = current_cache.get_client(1).keys(query_key_prefix)
+    if len(cache_keys) > 0:
+        current_cache.delete_many(cache_keys)
+
+
+def test_clear_cache_callback_v4(
+    cache_alias: str,
+    cache_settings: Dict,
+    current_cache,
+):
+    """
+    Still another possibility with other versions of Redis.
+    See https://stackoverflow.com/a/71698532/5796086
+    CC BY SA 4.0
+    and see make_test_cache_key(), make_parallel_test_cache_key()
+    in this package.
+    """
+    key_function = cache_settings.get("KEY_FUNCTION")
+    key_prefix = cache_settings.get("KEY_PREFIX", "")
+    if key_function is make_test_cache_key:
+        query_key_prefix = f"test_cache:{key_prefix}:*"
+    elif key_function is make_parallel_test_cache_key:
+        query_key_prefix = f"test_cache{os.getpid()}:{key_prefix}:*"
+    else:
+        return
+    cache_keys = current_cache.get_client().keys(query_key_prefix)
+    if len(cache_keys) > 0:
+        current_cache.delete_many(cache_keys)
