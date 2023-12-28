@@ -113,6 +113,10 @@ def test_clear_cache_callback_v2(
     CC BY SA 4.0
     and see make_test_cache_key(), make_parallel_test_cache_key()
     in this package.
+    And see v5...
+    in case .keys() and .delete_many() apply KEY_FUNCTION
+    and you want to cover all versions
+    (the third parameter of KEY_FUNCTION)...
     """
     key_function = cache_settings.get("KEY_FUNCTION")
     key_prefix = cache_settings.get("KEY_PREFIX", "")
@@ -175,3 +179,24 @@ def test_clear_cache_callback_v4(
     cache_keys = current_cache.get_client().keys(query_key_prefix)
     if len(cache_keys) > 0:
         current_cache.delete_many(cache_keys)
+
+
+def test_clear_cache_callback_v5(
+    cache_alias: str,
+    cache_settings: Dict,
+    current_cache,
+):
+    """
+    A nice possibility with Redis.
+    """
+    key_function = cache_settings.get("KEY_FUNCTION")
+    key_prefix = cache_settings.get("KEY_PREFIX", "")
+    if key_function is make_test_cache_key:
+        query_key_prefix = f"test_cache:{key_prefix}:*"
+    elif key_function is make_parallel_test_cache_key:
+        query_key_prefix = f"test_cache{os.getpid()}:{key_prefix}:*"
+    else:
+        return
+    cache_keys = current_cache.client.get_client(write=False).keys(query_key_prefix)
+    if len(cache_keys) > 0:
+        current_cache.client.get_client(write=True).delete(*cache_keys)
