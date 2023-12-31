@@ -1,6 +1,8 @@
 # django-monkey-patches
 
 [![pypi-version]][pypi]
+[![Downloads](https://img.shields.io/pypi/dm/django-monkey-patches)](https://pypistats.org/packages/django-monkey-patches)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 **A collection of monkey patches to improve Django framework**
 
