@@ -54,5 +54,5 @@ def patched_to_representation_v1(self, data):
 
 
 def apply_patched_to_representation_v1():
-    ListSerializer.to_representation = to_representation_patch
+    ListSerializer.to_representation = patched_to_representation_v1
     return original_to_representation
