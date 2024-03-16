@@ -18,29 +18,19 @@ If not, see <http://www.gnu.org/licenses/>.
 ©Copyright 2023-2024 Laurent Lyaudet
 """
 
-"""
-There is an inconsistency in behavior of current QuerySet.get_or_create():
-It avoids unnecessary DB query for related object given as argument
-only if created is True.
-I gave a script demonstrating this here:
-https://code.djangoproject.com/ticket/34884
-The patch of get_or_create() can be replaced by
-a more general patch on QuerySet.get().
-"""
-from django.db.models import QuerySet
-
-from .django__query_set import put_filter_arg_in_field_cache
+from django.core.exceptions import FieldDoesNotExist
+from django.db.models import ForeignKey
 
 
-original_get = QuerySet.get
-
-
-def patched_get_v1(self, *args, **kwargs):
-    result = original_get(self, *args, **kwargs)
-    put_filter_arg_in_field_cache(result, kwargs)
-    return result
-
-
-def apply_patched_get_v1():
-    QuerySet.get = patched_get_v1
-    return original_get
+def put_filter_arg_in_field_cache(obj, kwargs):
+    """
+    Given an object and a dict of field-values/filtering-args
+    put in the cache of ForeignKey/OneToOneField the given objects.
+    """
+    for key, value in kwargs.items():
+        try:
+            if isinstance(obj._meta.get_field(key), ForeignKey):
+                # isinstance handles OneToOneField also.
+                setattr(obj, key, value)
+        except FieldDoesNotExist:
+            pass

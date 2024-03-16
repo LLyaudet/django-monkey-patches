@@ -17,6 +17,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
 """
+
 """
 A collection of functions to make the key used by the cache.
 As of now, it is only for tests.

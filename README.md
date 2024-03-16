@@ -10,7 +10,6 @@
 ![GitHub License](https://img.shields.io/github/license/llyaudet/django-monkey-patches)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/django-monkey-patches)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/llyaudet/django-monkey-patches)
-![Lines of code](https://img.shields.io/tokei/lines/github/llyaudet/django-monkey-patches)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/LLyaudet)
 
 **A collection of monkey patches to improve Django framework**

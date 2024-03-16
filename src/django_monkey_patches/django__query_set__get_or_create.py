@@ -17,6 +17,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
 """
+
 """
 There is an inconsistency in behavior of current QuerySet.get_or_create():
 It avoids unnecessary DB query for related object given as argument
@@ -26,8 +27,9 @@ https://code.djangoproject.com/ticket/34884
 In my tests, this patch yields a speed up of almost 10 %,
 since it avoids many unnecessary queries.
 """
-from django.core.exceptions import FieldDoesNotExist
-from django.db.models import QuerySet, ForeignKey
+from django.db.models import QuerySet
+
+from .django__query_set import put_filter_arg_in_field_cache
 
 
 original_get_or_create = QuerySet.get_or_create
@@ -36,13 +38,7 @@ original_get_or_create = QuerySet.get_or_create
 def patched_get_or_create_v1(self, defaults=None, **kwargs):
     result, created = original_get_or_create(self, defaults=defaults, **kwargs)
     if not created:
-        for key, value in kwargs.items():
-            try:
-                if isinstance(result._meta.get_field(key), ForeignKey):
-                    # isinstance handles OneToOneField also.
-                    setattr(result, key, value)
-            except FieldDoesNotExist:
-                pass
+        put_filter_arg_in_field_cache(result, kwargs)
     return result, created
 
 

@@ -17,6 +17,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
 """
+
 """
 Django Rest Framework is considered "feature-complete".
 But if you had the chance to work with an in-house framework
