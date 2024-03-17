@@ -12,7 +12,7 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/llyaudet/django-monkey-patches)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/LLyaudet)](https://github.com/sponsors/LLyaudet)
 
-**A collection of monkey patches to improve Django framework**
+|     A collection of monkey patches to improve Django framework     |
 
 
 ## Use
