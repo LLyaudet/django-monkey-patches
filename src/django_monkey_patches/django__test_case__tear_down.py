@@ -44,6 +44,7 @@ according to your use case.
 
 /!\ Make sure you call super().tearDown() in your custom tearDown() methods.
 """
+
 import os
 from typing import Dict
 
@@ -52,10 +53,9 @@ from django.core.cache import cache, caches
 from django.test import TestCase
 
 from .django__base_cache__make_cache_key import (
-    make_test_cache_key,
     make_parallel_test_cache_key,
+    make_test_cache_key,
 )
-
 
 # This function is a noop (pass).
 original_tear_down = TestCase.tearDown

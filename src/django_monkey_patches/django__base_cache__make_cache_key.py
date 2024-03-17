@@ -20,6 +20,7 @@ If not, see <http://www.gnu.org/licenses/>.
 A collection of functions to make the key used by the cache.
 As of now, it is only for tests.
 """
+
 import os
 
 

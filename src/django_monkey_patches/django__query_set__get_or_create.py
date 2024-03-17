@@ -25,10 +25,10 @@ https://code.djangoproject.com/ticket/34884
 In my tests, this patch yields a speed up of almost 10 %,
 since it avoids many unnecessary queries.
 """
+
 from django.db.models import QuerySet
 
 from .django__query_set import put_filter_arg_in_field_cache
-
 
 original_get_or_create = QuerySet.get_or_create
 

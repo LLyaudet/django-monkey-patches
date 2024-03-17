@@ -25,10 +25,10 @@ https://code.djangoproject.com/ticket/34884
 The patch of get_or_create() can be replaced by
 a more general patch on QuerySet.get().
 """
+
 from django.db.models import QuerySet
 
 from .django__query_set import put_filter_arg_in_field_cache
-
 
 original_get = QuerySet.get
 
