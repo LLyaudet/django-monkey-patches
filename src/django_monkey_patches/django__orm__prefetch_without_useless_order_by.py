@@ -43,7 +43,6 @@ from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
 )
 
-
 # In old versions of Django, the method is called get_prefetch_queryset().
 # It is deprecated in Django 5 and will be removed in Django 6.
 # Apply the patch that corresponds to your version.
@@ -70,19 +69,21 @@ if hasattr(ReverseOneToOneDescriptor, "get_prefetch_querysets"):
     )
 
 
+def get_correct_queryset(self, queryset):
+    if queryset is None:
+        queryset = self.get_queryset()
+    return queryset.order_by()
+
+
 def patched_forward_many_to_one_get_prefetch_queryset_v1(
     self, instances, queryset=None
 ):
-    if queryset is None:
-        queryset = self.get_queryset()
-    queryset = queryset.order_by()
+    queryset = get_correct_queryset(self, queryset)
     return original_forward_many_to_one_get_prefetch_queryset(self, instances, queryset)
 
 
 def patched_reverse_one_to_one_get_prefetch_queryset_v1(self, instances, queryset=None):
-    if queryset is None:
-        queryset = self.get_queryset()
-    queryset = queryset.order_by()
+    queryset = get_correct_queryset(self, queryset)
     return original_reverse_one_to_one_get_prefetch_queryset(self, instances, queryset)
 
 
@@ -95,13 +96,18 @@ def apply_patched_get_prefetch_queryset_v1():
     )
 
 
-def patched_forward_many_to_one_get_prefetch_querysets_v1(
-    self, instances, querysets=None
-):
+def get_correct_querysets(self, querysets):
     if querysets is None:
         querysets = [self.get_queryset()]
     if len(querysets) == 1:
         querysets[0] = querysets[0].order_by()
+    return querysets
+
+
+def patched_forward_many_to_one_get_prefetch_querysets_v1(
+    self, instances, querysets=None
+):
+    querysets = get_correct_querysets(self, querysets)
     return original_forward_many_to_one_get_prefetch_querysets(
         self, instances, querysets
     )
@@ -110,10 +116,7 @@ def patched_forward_many_to_one_get_prefetch_querysets_v1(
 def patched_reverse_one_to_one_get_prefetch_querysets_v1(
     self, instances, querysets=None
 ):
-    if querysets is None:
-        querysets = [self.get_queryset()]
-    if len(querysets) == 1:
-        querysets[0] = querysets[0].order_by()
+    querysets = get_correct_querysets(self, querysets)
     return original_reverse_one_to_one_get_prefetch_querysets(
         self, instances, querysets
     )
