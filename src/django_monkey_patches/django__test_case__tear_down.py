@@ -58,7 +58,7 @@ from .django__base_cache__make_cache_key import (
 
 
 # This function is a noop (pass).
-original_tearDown = TestCase.tearDown
+original_tear_down = TestCase.tearDown
 
 
 def patched_tear_down_v1(self, *args, **kwargs):
