@@ -16,9 +16,7 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
-"""
-
-"""
+-------------------------------------------------------------------------
 Django Rest Framework is considered "feature-complete".
 But if you had the chance to work with an in-house framework
 like I did in PHP for 8,5 years,

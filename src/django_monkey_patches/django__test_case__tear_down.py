@@ -1,4 +1,4 @@
-"""
+r"""
 This file is part of django-monkey-patches library.
 
 django-monkey-patches is free software: you can redistribute it and/or modify
@@ -16,9 +16,7 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
-"""
-
-r"""
+-------------------------------------------------------------------------
 Choose between flaky tests by default,
 and slow tests by default.
 The topic is complex,
