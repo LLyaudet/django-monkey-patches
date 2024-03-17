@@ -1,4 +1,4 @@
-# django-monkey-patches
+<h1 style="text-align: center;">django-monkey-patches</h1>
 
 [![pypi-version]][pypi]
 [![Downloads](https://img.shields.io/pypi/dm/django-monkey-patches)](https://pypistats.org/packages/django-monkey-patches)
@@ -12,7 +12,7 @@
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/llyaudet/django-monkey-patches)
 [![GitHub Sponsors](https://img.shields.io/github/sponsors/LLyaudet)](https://github.com/sponsors/LLyaudet)
 
-**A collection of monkey patches to improve Django framework**
+<b style="text-align: center;">A collection of monkey patches to improve Django framework</b>
 
 
 ## Use
