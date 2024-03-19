@@ -39,9 +39,8 @@ old_prefetch__init__ = Prefetch.__init__
 def patched_prefetch__init__v1(
     self, lookup, queryset=None, to_attr=None, filter_callback=None
 ):
-    result = old_prefetch__init__(self, lookup, queryset=queryset, to_attr=to_attr)
+    old_prefetch__init__(self, lookup, queryset=queryset, to_attr=to_attr)
     self.filter_callback = filter_callback
-    return result
 
 
 old_prefetch_one_level = query.prefetch_one_level
@@ -55,9 +54,6 @@ def patched_prefetch_one_level_v1(instances, prefetcher, lookup, level):
     if len(instances) == 0:
         return [], ()
     return old_prefetch_one_level(instances, prefetcher, lookup, level)
-
-
-query.prefetch_one_level = new_prefetch_one_level
 
 
 def apply_patch_prefetch_with_filter_callback_v1():
