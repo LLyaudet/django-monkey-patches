@@ -131,6 +131,10 @@ source = (
         "def patched_prefetch_related_objects_v1",
     )
     .replace(
+        "done_queries = {}",
+        'done_queries = {"": model_instances}',
+    )
+    .replace(
         "if lookup.prefetch_to in done_queries:",
         "if lookup.prefetch_to in done_queries:\n"
         "            if lookup.post_prefetch_callback:\n"
@@ -173,3 +177,84 @@ def apply_patch_prefetch_with_v2():
     query.prefetch_related_objects = (
         patched_prefetch_related_objects_v1
     )
+
+
+# https://github.com/pylint-dev/pylint/issues/9512
+# pylint: disable=unused-argument
+def create_post_prefetch_callback_add_backward_multiple(
+    # Examples:
+    # retrieve_forward_cache_callback=
+    #   lambda x: [x.my_foreign_key] if x.my_foreign_key else []
+    # retrieve_forward_cache_callback=
+    #   lambda x: x._prefetched_objects_cache.get("toto", [])
+    retrieve_forward_cache_callback,
+    # backward_cache will always go
+    # in x._prefetched_objects_cache as a dict
+    # with a unique key to avoid repeating and the object.
+    backward_cache_name,
+    backward_level=0,
+    # defaults to obj.pk
+    get_key_for_backward_object_callback=None,
+):
+    """
+    A function to obtain post_prefetch_callbacks
+    filling backward relationships when multiple objects
+    can prefetch the same object.
+    Note that when the models relationships allow only
+    one single object to prefetch the same object,
+    then the framework already fills the backward cache.
+    """
+
+    def post_prefetch_callback_add_backward_multiple(
+        lookup,
+        done_queries,
+    ):
+        """
+        The customized post_prefetch_callback function
+        that will be returned.
+        """
+        prefetch_to = lookup.prefetch_to
+        # https://github.com/pylint-dev/pylint/issues/9512
+        # pylint: disable=used-before-assignment
+        while backward_level > 0:
+            if prefetch_to == "":
+                raise ValueError(
+                    "post_prefetch_callback_add_backward_multiple()"
+                    " You're going backward too much."
+                )
+            if prefetch_to.find(LOOKUP_SEP) == -1:
+                raise ValueError(
+                    "post_prefetch_callback_add_backward_multiple()"
+                    " You're going backward too much."
+                )
+            prefetch_to = prefetch_to[: prefetch_to.rfind(LOOKUP_SEP)]
+            backward_level -= 1
+        prefetch_before = ""
+        if prefetch_to.find(LOOKUP_SEP) != -1:
+            prefetch_before = prefetch_to[
+                : prefetch_to.rfind(LOOKUP_SEP)
+            ]
+        for obj in done_queries[prefetch_before]:
+            forward_objects = retrieve_forward_cache_callback(obj)
+            if get_key_for_backward_object_callback is None:
+                key = obj.pk
+            else:
+                key = get_key_for_backward_object_callback(obj)
+            for obj2 in forward_objects:
+                # pylint: disable=protected-access
+                if (
+                    obj2._prefetched_objects_cache.get(
+                        backward_cache_name
+                    )
+                    is None
+                ):
+                    # pylint: disable=protected-access
+                    obj2._prefetched_objects_cache[
+                        backward_cache_name
+                    ] = {}
+                # pylint: disable=protected-access
+                obj2._prefetched_objects_cache[backward_cache_name][
+                    key
+                ] = obj
+
+    return post_prefetch_callback_add_backward_multiple
