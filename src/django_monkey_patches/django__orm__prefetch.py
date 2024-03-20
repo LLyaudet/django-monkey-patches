@@ -31,8 +31,18 @@ will have this feature,
 and maybe older versions if it is backported to some.
 """
 
+import importlib
+
 # pylint: disable=import-error
 from django.db.models import Prefetch, query
+
+# See exec below for the need of these imports.
+# pylint: disable=import-error,unused-import
+from django.db.models.query import (
+    LOOKUP_SEP,
+    get_prefetcher,
+    normalize_prefetch_lookups,
+)
 
 old_prefetch__init__ = Prefetch.__init__
 
@@ -47,6 +57,26 @@ def patched_prefetch__init__v1(
         self, lookup, queryset=queryset, to_attr=to_attr
     )
     self.filter_callback = filter_callback
+
+
+# pylint: disable=too-many-arguments
+def patched_prefetch__init__v2(
+    self,
+    lookup,
+    queryset=None,
+    to_attr=None,
+    filter_callback=None,
+    post_prefetch_callback=None,
+):
+    """
+    Patch for Prefetch.__init__ with filter_callback
+    and post_prefetch_callback kwargs.
+    """
+    old_prefetch__init__(
+        self, lookup, queryset=queryset, to_attr=to_attr
+    )
+    self.filter_callback = filter_callback
+    self.post_prefetch_callback = post_prefetch_callback
 
 
 old_prefetch_one_level = query.prefetch_one_level
@@ -78,3 +108,68 @@ def apply_patch_prefetch_with_filter_callback_v1():
     """
     Prefetch.__init__ = patched_prefetch__init__v1
     query.prefetch_one_level = patched_prefetch_one_level_v1
+
+
+# Now things are starting to be amusing.
+# We load the source code of the function prefetch_related_objects()
+# in the installed version of Django and we patch its source code
+# with string manipulations.
+# First time for me in Python (not in PHP). :)
+# It works with Django 2.2 and Django 5.0,
+# probably also with versions in-between and after.
+spec = importlib.util.find_spec("django.db.models.query", "django")
+source = spec.loader.get_source("django.db.models.query")
+source = source[
+    source.find("def prefetch_related_objects") : source.find(
+        "obj_list = new_obj_list"
+    )
+    + len("obj_list = new_obj_list")
+]
+source = (
+    source.replace(
+        "def prefetch_related_objects",
+        "def patched_prefetch_related_objects_v1",
+    )
+    .replace(
+        "if lookup.prefetch_to in done_queries:",
+        "if lookup.prefetch_to in done_queries:\n"
+        "            if lookup.post_prefetch_callback:\n"
+        "                lookup.post_prefetch_callback(lookup, done_queries)\n",
+    )
+    .replace(
+        "obj_list = new_obj_list",
+        "obj_list = new_obj_list\n"
+        "        if lookup.post_prefetch_callback:\n"
+        "            lookup.post_prefetch_callback(lookup, done_queries)\n",
+    )
+)
+
+
+# local value needed for the exec
+prefetch_one_level = patched_prefetch_one_level_v1
+
+# This line is not needed;
+# in fact exec below will define the variable.
+# But it is clearer.
+# pylint: disable=invalid-name
+patched_prefetch_related_objects_v1 = None
+
+# pylint: disable=exec-used
+exec(
+    source,
+    globals(),
+    locals(),
+)
+
+
+def apply_patch_prefetch_with_v2():
+    """
+    Applying the patch for prefetches with:
+    - filter_callback,
+    - post_prefetch_callback.
+    """
+    Prefetch.__init__ = patched_prefetch__init__v2
+    query.prefetch_one_level = patched_prefetch_one_level_v1
+    query.prefetch_related_objects = (
+        patched_prefetch_related_objects_v1
+    )
