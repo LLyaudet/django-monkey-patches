@@ -179,8 +179,6 @@ def apply_patch_prefetch_with_v2():
     )
 
 
-# https://github.com/pylint-dev/pylint/issues/9512
-# pylint: disable=unused-argument
 def create_post_prefetch_callback_add_backward_multiple(
     # Examples:
     # retrieve_forward_cache_callback=
@@ -213,9 +211,12 @@ def create_post_prefetch_callback_add_backward_multiple(
         The customized post_prefetch_callback function
         that will be returned.
         """
+        nonlocal retrieve_forward_cache_callback
+        nonlocal backward_cache_name
+        nonlocal backward_level
+        nonlocal get_key_for_backward_object_callback
+
         prefetch_to = lookup.prefetch_to
-        # https://github.com/pylint-dev/pylint/issues/9512
-        # pylint: disable=used-before-assignment
         while backward_level > 0:
             if prefetch_to == "":
                 raise ValueError(
