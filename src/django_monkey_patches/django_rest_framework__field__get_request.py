@@ -28,10 +28,15 @@ Field class introduces the context property and BaseSerializer inherits of Field
 so the right place to add this helper functions is Field.
 """
 
+# pylint: disable=import-error
 from rest_framework.fields import Field
 
 
 def get_request_query_params(self):
+    """
+    Enables shorter code to access request query params
+    from serializer.
+    """
     request = self.context.get("request", None)
     if request is None:
         return {}
@@ -45,13 +50,22 @@ def get_request_query_params(self):
 
 
 def get_request_data(self):
+    """
+    Enables shorter code to access request data
+    from serializer.
+    """
     request = self.context.get("request", None)
     if request is None or not hasattr(request, "data"):
         return {}
     return request.data
 
 
+# pylint: disable=invalid-name
 def get_request_POST(self):
+    """
+    Enables shorter code to access request POST
+    from serializer.
+    """
     request = self.context.get("request", None)
     if request is None:
         return {}
@@ -59,18 +73,35 @@ def get_request_POST(self):
 
 
 def get_one_request_query_param(self, key, default=None):
+    """
+    Enables still shorter code to access one request query param
+    from serializer.
+    """
     return self.get_request_query_params().get(key, default)
 
 
 def get_one_request_datum(self, key, default=None):
+    """
+    Enables still shorter code to access one request datum
+    from serializer.
+    """
     return self.get_request_data().get(key, default)
 
 
+# pylint: disable=invalid-name
 def get_one_request_POST_datum(self, key, default=None):
+    """
+    Enables still shorter code to access one request POST datum
+    from serializer.
+    """
     return self.get_request_POST().get(key, default)
 
 
 def apply_get_request_patch_v1():
+    """
+    Add to Field (and Serializer) all the shortcuts.
+    """
+
     Field.get_request_query_params = get_request_query_params
     Field.get_request_data = get_request_data
     Field.get_request_POST = get_request_POST

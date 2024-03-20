@@ -26,6 +26,7 @@ You may apply the patch,
 or use patched_to_representation_v1 in a class inheriting from ListSerializer.
 """
 
+# pylint: disable=import-error
 from django.db import models
 from rest_framework.serializers import ListSerializer
 
@@ -38,12 +39,22 @@ def patched_to_representation_v1(self, data):
     """
     # Dealing with nested relationships, data can be a Manager,
     # so, first get a queryset from the Manager if needed
-    iterable = data.all() if isinstance(data, models.manager.BaseManager) else data
+    iterable = (
+        data.all()
+        if isinstance(data, models.manager.BaseManager)
+        else data
+    )
 
     if self.context.get("list_before_representation_callback"):
-        self.context.get("list_before_representation_callback")(iterable)
-    elif self.child.context.get("list_before_representation_callback"):
-        self.child.context.get("list_before_representation_callback")(iterable)
+        self.context.get("list_before_representation_callback")(
+            iterable
+        )
+    elif self.child.context.get(
+        "list_before_representation_callback"
+    ):
+        self.child.context.get("list_before_representation_callback")(
+            iterable
+        )
     elif hasattr(self, "list_before_representation_callback"):
         self.list_before_representation_callback(iterable)
     elif hasattr(self.child, "list_before_representation_callback"):
@@ -53,5 +64,9 @@ def patched_to_representation_v1(self, data):
 
 
 def apply_patched_to_representation_v1():
+    """
+    Apply the patch to enable custom computation before the end of
+    the list serializer to_representation().
+    """
     ListSerializer.to_representation = patched_to_representation_v1
     return original_to_representation

@@ -18,6 +18,7 @@ If not, see <http://www.gnu.org/licenses/>.
 ©Copyright 2023-2024 Laurent Lyaudet
 """
 
+# pylint: disable=import-error
 from django.core.exceptions import FieldDoesNotExist
 from django.db.models import ForeignKey
 
@@ -29,6 +30,7 @@ def put_filter_arg_in_field_cache(obj, kwargs):
     """
     for key, value in kwargs.items():
         try:
+            # pylint: disable=protected-access
             if isinstance(obj._meta.get_field(key), ForeignKey):
                 # isinstance handles OneToOneField also.
                 setattr(obj, key, value)

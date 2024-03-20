@@ -26,6 +26,7 @@ In my tests, this patch yields a speed up of almost 10 %,
 since it avoids many unnecessary queries.
 """
 
+# pylint: disable=import-error
 from django.db.models import QuerySet
 
 from .django__query_set import put_filter_arg_in_field_cache
@@ -34,12 +35,20 @@ original_get_or_create = QuerySet.get_or_create
 
 
 def patched_get_or_create_v1(self, defaults=None, **kwargs):
-    result, created = original_get_or_create(self, defaults=defaults, **kwargs)
+    """
+    Patch for QuerySet.get_or_create() with foreign key cache.
+    """
+    result, created = original_get_or_create(
+        self, defaults=defaults, **kwargs
+    )
     if not created:
         put_filter_arg_in_field_cache(result, kwargs)
     return result, created
 
 
 def apply_patched_get_or_create_v1():
+    """
+    Apply the patch for QuerySet.get() with foreign key cache.
+    """
     QuerySet.get_or_create = patched_get_or_create_v1
     return original_get_or_create

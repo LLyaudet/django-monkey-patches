@@ -25,9 +25,20 @@ dependencies = [
 requires-python = ">=3.0"
 
 [project.optional-dependencies]
-dev = ["black"]
+dev = [
+  "black",
+  "isort",
+  "pylint",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/LLyaudet/django-monkey-patches"
 "Bug Tracker" = "https://github.com/LLyaudet/django-monkey-patches/issues"
+
+[tool.black]
+line-length = 70
+
+[tool.isort]
+profile = "black"
+line_length = 70
 

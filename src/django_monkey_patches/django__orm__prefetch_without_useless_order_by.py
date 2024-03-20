@@ -38,6 +38,7 @@ will not have this problem,
 and maybe older versions if it is backported to some.
 """
 
+# pylint: disable=import-error
 from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
     ReverseOneToOneDescriptor,
@@ -46,22 +47,26 @@ from django.db.models.fields.related_descriptors import (
 # In old versions of Django, the method is called get_prefetch_queryset().
 # It is deprecated in Django 5 and will be removed in Django 6.
 # Apply the patch that corresponds to your version.
+# pylint: disable=invalid-name
 original_forward_many_to_one_get_prefetch_queryset = None
 if hasattr(ForwardManyToOneDescriptor, "get_prefetch_queryset"):
     original_forward_many_to_one_get_prefetch_queryset = (
         ForwardManyToOneDescriptor.get_prefetch_queryset
     )
+# pylint: disable=invalid-name
 original_reverse_one_to_one_get_prefetch_queryset = None
 if hasattr(ReverseOneToOneDescriptor, "get_prefetch_queryset"):
     original_reverse_one_to_one_get_prefetch_queryset = (
         ReverseOneToOneDescriptor.get_prefetch_queryset
     )
 
+# pylint: disable=invalid-name
 original_forward_many_to_one_get_prefetch_querysets = None
 if hasattr(ForwardManyToOneDescriptor, "get_prefetch_querysets"):
     original_forward_many_to_one_get_prefetch_querysets = (
         ForwardManyToOneDescriptor.get_prefetch_querysets
     )
+# pylint: disable=invalid-name
 original_reverse_one_to_one_get_prefetch_querysets = None
 if hasattr(ReverseOneToOneDescriptor, "get_prefetch_querysets"):
     original_reverse_one_to_one_get_prefetch_querysets = (
@@ -70,6 +75,9 @@ if hasattr(ReverseOneToOneDescriptor, "get_prefetch_querysets"):
 
 
 def get_correct_queryset(self, queryset):
+    """
+    The patched way to init the queryset in get_prefetch_queryset().
+    """
     if queryset is None:
         queryset = self.get_queryset()
     return queryset.order_by()
@@ -78,16 +86,32 @@ def get_correct_queryset(self, queryset):
 def patched_forward_many_to_one_get_prefetch_queryset_v1(
     self, instances, queryset=None
 ):
+    """
+    The patch for ForwardManyToOneDescriptor.get_prefetch_queryset().
+    """
     queryset = get_correct_queryset(self, queryset)
-    return original_forward_many_to_one_get_prefetch_queryset(self, instances, queryset)
+    return original_forward_many_to_one_get_prefetch_queryset(
+        self, instances, queryset
+    )
 
 
-def patched_reverse_one_to_one_get_prefetch_queryset_v1(self, instances, queryset=None):
+def patched_reverse_one_to_one_get_prefetch_queryset_v1(
+    self, instances, queryset=None
+):
+    """
+    The patch for ReverseOneToOneDescriptor.get_prefetch_queryset().
+    """
     queryset = get_correct_queryset(self, queryset)
-    return original_reverse_one_to_one_get_prefetch_queryset(self, instances, queryset)
+    return original_reverse_one_to_one_get_prefetch_queryset(
+        self, instances, queryset
+    )
 
 
 def apply_patched_get_prefetch_queryset_v1():
+    """
+    Applying the patch for versions of Django with
+    get_prefetch_queryset().
+    """
     ForwardManyToOneDescriptor.get_prefetch_queryset = (
         patched_forward_many_to_one_get_prefetch_queryset_v1
     )
@@ -97,6 +121,9 @@ def apply_patched_get_prefetch_queryset_v1():
 
 
 def get_correct_querysets(self, querysets):
+    """
+    The patched way to init the querysets in get_prefetch_querysets().
+    """
     if querysets is None:
         querysets = [self.get_queryset()]
     if len(querysets) == 1:
@@ -107,6 +134,9 @@ def get_correct_querysets(self, querysets):
 def patched_forward_many_to_one_get_prefetch_querysets_v1(
     self, instances, querysets=None
 ):
+    """
+    The patch for ForwardManyToOneDescriptor.get_prefetch_querysets().
+    """
     querysets = get_correct_querysets(self, querysets)
     return original_forward_many_to_one_get_prefetch_querysets(
         self, instances, querysets
@@ -116,6 +146,9 @@ def patched_forward_many_to_one_get_prefetch_querysets_v1(
 def patched_reverse_one_to_one_get_prefetch_querysets_v1(
     self, instances, querysets=None
 ):
+    """
+    The patch for ReverseOneToOneDescriptor.get_prefetch_querysets().
+    """
     querysets = get_correct_querysets(self, querysets)
     return original_reverse_one_to_one_get_prefetch_querysets(
         self, instances, querysets
@@ -123,6 +156,10 @@ def patched_reverse_one_to_one_get_prefetch_querysets_v1(
 
 
 def apply_patched_get_prefetch_querysets_v1():
+    """
+    Applying the patch for versions of Django with
+    get_prefetch_querysets().
+    """
     ForwardManyToOneDescriptor.get_prefetch_querysets = (
         patched_forward_many_to_one_get_prefetch_querysets_v1
     )

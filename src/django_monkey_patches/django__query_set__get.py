@@ -26,6 +26,7 @@ The patch of get_or_create() can be replaced by
 a more general patch on QuerySet.get().
 """
 
+# pylint: disable=import-error
 from django.db.models import QuerySet
 
 from .django__query_set import put_filter_arg_in_field_cache
@@ -34,11 +35,17 @@ original_get = QuerySet.get
 
 
 def patched_get_v1(self, *args, **kwargs):
+    """
+    Patch for QuerySet.get() with foreign key cache.
+    """
     result = original_get(self, *args, **kwargs)
     put_filter_arg_in_field_cache(result, kwargs)
     return result
 
 
 def apply_patched_get_v1():
+    """
+    Apply the patch for QuerySet.get() with foreign key cache.
+    """
     QuerySet.get = patched_get_v1
     return original_get

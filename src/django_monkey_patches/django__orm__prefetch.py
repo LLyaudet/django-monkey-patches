@@ -31,6 +31,7 @@ will have this feature,
 and maybe older versions if it is backported to some.
 """
 
+# pylint: disable=import-error
 from django.db.models import Prefetch, query
 
 old_prefetch__init__ = Prefetch.__init__
@@ -39,23 +40,41 @@ old_prefetch__init__ = Prefetch.__init__
 def patched_prefetch__init__v1(
     self, lookup, queryset=None, to_attr=None, filter_callback=None
 ):
-    old_prefetch__init__(self, lookup, queryset=queryset, to_attr=to_attr)
+    """
+    Patch for Prefetch.__init__ with filter_callback kwarg.
+    """
+    old_prefetch__init__(
+        self, lookup, queryset=queryset, to_attr=to_attr
+    )
     self.filter_callback = filter_callback
 
 
 old_prefetch_one_level = query.prefetch_one_level
 
 
-def patched_prefetch_one_level_v1(instances, prefetcher, lookup, level):
+def patched_prefetch_one_level_v1(
+    instances, prefetcher, lookup, level
+):
+    """
+    Patch for prefetch_one_level()
+    applying Prefetch.filter_callback.
+    """
     if lookup.filter_callback is not None:
         instances = [
-            instance for instance in instances if lookup.filter_callback(instance)
+            instance
+            for instance in instances
+            if lookup.filter_callback(instance)
         ]
     if len(instances) == 0:
         return [], ()
-    return old_prefetch_one_level(instances, prefetcher, lookup, level)
+    return old_prefetch_one_level(
+        instances, prefetcher, lookup, level
+    )
 
 
 def apply_patch_prefetch_with_filter_callback_v1():
+    """
+    Applying the patch for prefetches on subsets of instances.
+    """
     Prefetch.__init__ = patched_prefetch__init__v1
     query.prefetch_one_level = patched_prefetch_one_level_v1

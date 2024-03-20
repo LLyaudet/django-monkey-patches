@@ -48,6 +48,7 @@ according to your use case.
 import os
 from typing import Dict
 
+# pylint: disable=import-error
 from django.conf import settings
 from django.core.cache import cache, caches
 from django.test import TestCase
@@ -61,14 +62,24 @@ from .django__base_cache__make_cache_key import (
 original_tear_down = TestCase.tearDown
 
 
+# pylint: disable=unused-argument
 def patched_tear_down_v1(self, *args, **kwargs):
+    """
+    Not recommended,
+    it will wipe out everything in the current cache.
+    """
     cache.clear()
 
 
 def apply_patched_tear_down_v1():
+    """
+    Apply a not recommended patch,
+    it will wipe out everything in the current cache.
+    """
     TestCase.tearDown = patched_tear_down_v1
 
 
+# pylint: disable=unused-argument
 def patched_tear_down_v2(self, *args, **kwargs):
     """
     This is the most flexible patch
@@ -89,9 +100,14 @@ def patched_tear_down_v2(self, *args, **kwargs):
 
 
 def apply_patched_tear_down_v2():
+    """
+    Apply the recommended and flexible patch
+    for cleaning cache in tests.
+    """
     TestCase.tearDown = patched_tear_down_v2
 
 
+# pylint: disable=unused-argument
 def test_clear_cache_callback_v1(
     cache_alias: str,
     cache_settings: Dict,
@@ -101,6 +117,7 @@ def test_clear_cache_callback_v1(
     current_cache.clear()
 
 
+# pylint: disable=unused-argument
 def test_clear_cache_callback_v2(
     cache_alias: str,
     cache_settings: Dict,
@@ -130,6 +147,7 @@ def test_clear_cache_callback_v2(
         current_cache.delete_many(cache_keys)
 
 
+# pylint: disable=unused-argument
 def test_clear_cache_callback_v3(
     cache_alias: str,
     cache_settings: Dict,
@@ -155,6 +173,7 @@ def test_clear_cache_callback_v3(
         current_cache.delete_many(cache_keys)
 
 
+# pylint: disable=unused-argument
 def test_clear_cache_callback_v4(
     cache_alias: str,
     cache_settings: Dict,
@@ -180,6 +199,7 @@ def test_clear_cache_callback_v4(
         current_cache.delete_many(cache_keys)
 
 
+# pylint: disable=unused-argument
 def test_clear_cache_callback_v5(
     cache_alias: str,
     cache_settings: Dict,
@@ -196,6 +216,10 @@ def test_clear_cache_callback_v5(
         query_key_prefix = f"test_cache{os.getpid()}:{key_prefix}:*"
     else:
         return
-    cache_keys = current_cache.client.get_client(write=False).keys(query_key_prefix)
+    cache_keys = current_cache.client.get_client(write=False).keys(
+        query_key_prefix
+    )
     if len(cache_keys) > 0:
-        current_cache.client.get_client(write=True).delete(*cache_keys)
+        current_cache.client.get_client(write=True).delete(
+            *cache_keys
+        )
