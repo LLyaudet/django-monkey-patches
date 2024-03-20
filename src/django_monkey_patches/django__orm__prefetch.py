@@ -179,6 +179,22 @@ def apply_patch_prefetch_with_v2():
     )
 
 
+def get_previous_prefetch_to(prefetch_to):
+    """
+    Going one step before in the order of prefetches.
+    """
+    if prefetch_to == "":
+        raise ValueError(
+            "get_previous_prefetch_to()"
+            " You're going backward too much."
+        )
+    prefetch_before = ""
+    index = prefetch_to.rfind(LOOKUP_SEP)
+    if index != -1:
+        prefetch_before = prefetch_to[:index]
+    return prefetch_before
+
+
 def create_post_prefetch_callback_add_backward_multiple(
     # Examples:
     # retrieve_forward_cache_callback=
@@ -218,23 +234,9 @@ def create_post_prefetch_callback_add_backward_multiple(
 
         prefetch_to = lookup.prefetch_to
         while backward_level > 0:
-            if prefetch_to == "":
-                raise ValueError(
-                    "post_prefetch_callback_add_backward_multiple()"
-                    " You're going backward too much."
-                )
-            if prefetch_to.find(LOOKUP_SEP) == -1:
-                raise ValueError(
-                    "post_prefetch_callback_add_backward_multiple()"
-                    " You're going backward too much."
-                )
-            prefetch_to = prefetch_to[: prefetch_to.rfind(LOOKUP_SEP)]
+            prefetch_to = get_previous_prefetch_to(prefetch_to)
             backward_level -= 1
-        prefetch_before = ""
-        if prefetch_to.find(LOOKUP_SEP) != -1:
-            prefetch_before = prefetch_to[
-                : prefetch_to.rfind(LOOKUP_SEP)
-            ]
+        prefetch_before = get_previous_prefetch_to(prefetch_to)
         for obj in done_queries[prefetch_before]:
             forward_objects = retrieve_forward_cache_callback(obj)
             if get_key_for_backward_object_callback is None:
@@ -242,6 +244,9 @@ def create_post_prefetch_callback_add_backward_multiple(
             else:
                 key = get_key_for_backward_object_callback(obj)
             for obj2 in forward_objects:
+                if not hasattr(obj2, "_prefetched_objects_cache"):
+                    # pylint: disable=protected-access
+                    obj2._prefetched_objects_cache = {}
                 # pylint: disable=protected-access
                 if (
                     obj2._prefetched_objects_cache.get(
