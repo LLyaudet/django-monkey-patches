@@ -48,9 +48,13 @@ according to your use case.
 import os
 from typing import Dict
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from django.conf import settings
+
+# pylint: disable-next=import-error
 from django.core.cache import cache, caches
+
+# pylint: disable-next=import-error
 from django.test import TestCase
 
 from .django__base_cache__make_cache_key import (
@@ -62,7 +66,7 @@ from .django__base_cache__make_cache_key import (
 original_tear_down = TestCase.tearDown
 
 
-# pylint: disable=unused-argument
+# pylint: disable-next=unused-argument
 def patched_tear_down_v1(self, *args, **kwargs):
     """
     Not recommended,
@@ -79,7 +83,7 @@ def apply_patched_tear_down_v1():
     TestCase.tearDown = patched_tear_down_v1
 
 
-# pylint: disable=unused-argument
+# pylint: disable-next=unused-argument
 def patched_tear_down_v2(self, *args, **kwargs):
     """
     This is the most flexible patch
@@ -107,9 +111,10 @@ def apply_patched_tear_down_v2():
     TestCase.tearDown = patched_tear_down_v2
 
 
-# pylint: disable=unused-argument
 def test_clear_cache_callback_v1(
+    # pylint: disable-next=unused-argument
     cache_alias: str,
+    # pylint: disable-next=unused-argument
     cache_settings: Dict,
     current_cache,
 ):
@@ -117,8 +122,8 @@ def test_clear_cache_callback_v1(
     current_cache.clear()
 
 
-# pylint: disable=unused-argument
 def test_clear_cache_callback_v2(
+    # pylint: disable-next=unused-argument
     cache_alias: str,
     cache_settings: Dict,
     current_cache,
@@ -147,8 +152,8 @@ def test_clear_cache_callback_v2(
         current_cache.delete_many(cache_keys)
 
 
-# pylint: disable=unused-argument
 def test_clear_cache_callback_v3(
+    # pylint: disable-next=unused-argument
     cache_alias: str,
     cache_settings: Dict,
     current_cache,
@@ -173,8 +178,8 @@ def test_clear_cache_callback_v3(
         current_cache.delete_many(cache_keys)
 
 
-# pylint: disable=unused-argument
 def test_clear_cache_callback_v4(
+    # pylint: disable-next=unused-argument
     cache_alias: str,
     cache_settings: Dict,
     current_cache,
@@ -199,8 +204,8 @@ def test_clear_cache_callback_v4(
         current_cache.delete_many(cache_keys)
 
 
-# pylint: disable=unused-argument
 def test_clear_cache_callback_v5(
+    # pylint: disable-next=unused-argument
     cache_alias: str,
     cache_settings: Dict,
     current_cache,

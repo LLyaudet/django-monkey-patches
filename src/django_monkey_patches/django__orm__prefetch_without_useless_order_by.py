@@ -38,7 +38,7 @@ will not have this problem,
 and maybe older versions if it is backported to some.
 """
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from django.db.models.fields.related_descriptors import (
     ForwardManyToOneDescriptor,
     ReverseOneToOneDescriptor,
@@ -47,26 +47,26 @@ from django.db.models.fields.related_descriptors import (
 # In old versions of Django, the method is called get_prefetch_queryset().
 # It is deprecated in Django 5 and will be removed in Django 6.
 # Apply the patch that corresponds to your version.
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 original_forward_many_to_one_get_prefetch_queryset = None
 if hasattr(ForwardManyToOneDescriptor, "get_prefetch_queryset"):
     original_forward_many_to_one_get_prefetch_queryset = (
         ForwardManyToOneDescriptor.get_prefetch_queryset
     )
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 original_reverse_one_to_one_get_prefetch_queryset = None
 if hasattr(ReverseOneToOneDescriptor, "get_prefetch_queryset"):
     original_reverse_one_to_one_get_prefetch_queryset = (
         ReverseOneToOneDescriptor.get_prefetch_queryset
     )
 
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 original_forward_many_to_one_get_prefetch_querysets = None
 if hasattr(ForwardManyToOneDescriptor, "get_prefetch_querysets"):
     original_forward_many_to_one_get_prefetch_querysets = (
         ForwardManyToOneDescriptor.get_prefetch_querysets
     )
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 original_reverse_one_to_one_get_prefetch_querysets = None
 if hasattr(ReverseOneToOneDescriptor, "get_prefetch_querysets"):
     original_reverse_one_to_one_get_prefetch_querysets = (

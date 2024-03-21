@@ -26,7 +26,7 @@ In my tests, this patch yields a speed up of almost 10 %,
 since it avoids many unnecessary queries.
 """
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from django.db.models import QuerySet
 
 from .django__query_set import put_filter_arg_in_field_cache

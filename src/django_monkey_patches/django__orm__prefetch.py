@@ -174,11 +174,11 @@ I think we don't live in code of the same complexity.
 
 import importlib
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from django.db.models import Prefetch, query
 
 # See exec below for the need of these imports.
-# pylint: disable=import-error,unused-import
+# pylint: disable-next=import-error,unused-import
 from django.db.models.query import (
     LOOKUP_SEP,
     get_prefetcher,
@@ -200,7 +200,7 @@ def patched_prefetch__init__v1(
     self.filter_callback = filter_callback
 
 
-# pylint: disable=too-many-arguments
+# pylint: disable-next=too-many-arguments
 def patched_prefetch__init__v2(
     self,
     lookup,
@@ -296,10 +296,10 @@ prefetch_one_level = patched_prefetch_one_level_v1
 # This line is not needed;
 # in fact exec below will define the variable.
 # But it is clearer.
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 patched_prefetch_related_objects_v1 = None
 
-# pylint: disable=exec-used
+# pylint: disable-next=exec-used
 exec(
     source,
     globals(),
@@ -386,22 +386,69 @@ def create_post_prefetch_callback_add_backward_multiple(
                 key = get_key_for_backward_object_callback(obj)
             for obj2 in forward_objects:
                 if not hasattr(obj2, "_prefetched_objects_cache"):
-                    # pylint: disable=protected-access
+                    # pylint: disable-next=protected-access
                     obj2._prefetched_objects_cache = {}
-                # pylint: disable=protected-access
                 if (
+                    # pylint: disable-next=protected-access
                     obj2._prefetched_objects_cache.get(
                         backward_cache_name
                     )
                     is None
                 ):
-                    # pylint: disable=protected-access
+                    # pylint: disable-next=protected-access
                     obj2._prefetched_objects_cache[
                         backward_cache_name
                     ] = {}
-                # pylint: disable=protected-access
+                # pylint: disable-next=protected-access
                 obj2._prefetched_objects_cache[backward_cache_name][
                     key
                 ] = obj
 
     return post_prefetch_callback_add_backward_multiple
+
+
+e = ()  # empty_tuple
+
+
+def create_retrieve_forward_cache_callback_for_foreign_key(
+    f,  # field_name
+):
+    """
+    A function to obtain a retrieve_forward_cache_callback
+    corresponding to a foreign key of a Django model.
+    """
+    g = f + "_id"
+
+    def retrieve_forward_cache_callback_for_foreign_key(x):
+        """
+        The customized retrieve_forward_cache_callback function
+        that will be returned.
+        """
+
+        return e if getattr(x, g) is None else (getattr(x, f),)
+
+    return retrieve_forward_cache_callback_for_foreign_key
+
+
+def create_retrieve_forward_cache_callback_for_prefetched_objects(
+    c,  # cache_name
+):
+    """
+    A function to obtain a retrieve_forward_cache_callback
+    corresponding to an entry in _prefetched_objects_cache
+    of a Django model.
+    """
+
+    def retrieve_forward_cache_callback_for_prefetched_objects(x):
+        """
+        The customized retrieve_forward_cache_callback function
+        that will be returned.
+        """
+
+        if not hasattr(x, "_prefetched_objects_cache"):
+            return e
+
+        # pylint: disable-next=protected-access
+        return x._prefetched_objects_cache.get(c, e)
+
+    return retrieve_forward_cache_callback_for_prefetched_objects

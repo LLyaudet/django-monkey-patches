@@ -28,7 +28,7 @@ Field class introduces the context property and BaseSerializer inherits of Field
 so the right place to add this helper functions is Field.
 """
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from rest_framework.fields import Field
 
 
@@ -60,7 +60,7 @@ def get_request_data(self):
     return request.data
 
 
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 def get_request_POST(self):
     """
     Enables shorter code to access request POST
@@ -88,7 +88,7 @@ def get_one_request_datum(self, key, default=None):
     return self.get_request_data().get(key, default)
 
 
-# pylint: disable=invalid-name
+# pylint: disable-next=invalid-name
 def get_one_request_POST_datum(self, key, default=None):
     """
     Enables still shorter code to access one request POST datum

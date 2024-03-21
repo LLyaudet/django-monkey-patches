@@ -26,7 +26,7 @@ The patch of get_or_create() can be replaced by
 a more general patch on QuerySet.get().
 """
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from django.db.models import QuerySet
 
 from .django__query_set import put_filter_arg_in_field_cache

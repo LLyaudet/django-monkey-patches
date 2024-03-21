@@ -26,8 +26,10 @@ You may apply the patch,
 or use patched_to_representation_v1 in a class inheriting from ListSerializer.
 """
 
-# pylint: disable=import-error
+# pylint: disable-next=import-error
 from django.db import models
+
+# pylint: disable-next=import-error
 from rest_framework.serializers import ListSerializer
 
 original_to_representation = ListSerializer.to_representation
