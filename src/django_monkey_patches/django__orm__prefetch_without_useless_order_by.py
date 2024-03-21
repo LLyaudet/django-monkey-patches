@@ -17,7 +17,7 @@ If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
 -------------------------------------------------------------------------
-In current versions of Django, a prefetch use the ordering defined
+In older versions of Django, a prefetch use the ordering defined
 on the class prefetched.
 class Meta:
     ordering = ...
@@ -33,7 +33,7 @@ since the rest of the DB query is mainly an index scan.
 Note that I also submitted a ticket and a PR:
 https://code.djangoproject.com/ticket/35309
 https://github.com/django/django/pull/17984
-So, we can hope for the better that future releases of Django
+and it was merged, hence Django 5.1 and afterward
 will not have this problem,
 and maybe older versions if it is backported to some.
 """

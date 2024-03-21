@@ -26,9 +26,150 @@ Hence, I added a filter_callback argument to Prefetch.
 Note that I also submitted a ticket and a PR:
 https://code.djangoproject.com/ticket/35317
 https://github.com/django/django/pull/17994
-So, we can hope for the better that future releases of Django
-will have this feature,
-and maybe older versions if it is backported to some.
+Unfortunately, it was rejected without really considering
+the true value of it.
+Moreover, I had very special use cases that needed also to add
+a post_prefetch_callback argument to Prefetch.
+Below is the code enabling all this.
+You may not see the need for such things at first.
+But if you have some time, here is a redacted real world example
+of its use; at work, we use Django Rest Framework,
+with lots of nested serializers.
+In each model serializer, I add a static method enhance_queryset()
+calling the methods enhance_queryset() of the nested serializers, etc.
+So compare toy examples with production work...
+
+
+class OModelSerializer(...):
+    @staticmethod
+    def enhance_queryset(
+        query_set,
+        prefix: str = "",
+        c_id: Optional[CId] = None,
+    ):
+        query_set = SomeMixin1.enhance_queryset(query_set, prefix)
+
+        def ventilate_ps_by_c_id(
+            lookup,
+            done_queries,
+        ):
+            prefetch_to = lookup.prefetch_to
+            prefetch_before = get_previous_prefetch_to(prefetch_to)
+            for obj in prefetch_before:
+                if hasattr(obj, "needed_ps"):
+                    if not hasattr(obj, "needed_p_by"):
+                        obj.needed_p_by = {}
+                    for obj2 in obj.needed_ps:
+                        obj.needed_p_by[obj2.c_id] = obj2
+
+        return query_set.prefetch_related(
+            f"{prefix}p2",
+            Prefetch(
+                f"{prefix}s",
+                post_prefetch_callback=create_post_prefetch_callback_add_backward_multiple(
+                    retrieve_forward_cache_callback=lambda o: [o.s] if o.s_id else [],
+                    backward_cache_name="current_o_ancestors",
+                ),
+            ),
+            Prefetch(
+                f"{prefix}c2",
+                post_prefetch_callback=create_post_prefetch_callback_add_backward_multiple(
+                    retrieve_forward_cache_callback=lambda o:[o.c2] if o.c2_id else [],
+                    backward_cache_name="current_order_ancestors",
+                ),
+            ),
+            Prefetch(
+                f"{prefix}s__ps",
+                queryset=(
+                    P.objects.filter(c_id=c_id)
+                    if c_id
+                    else P.objects.all()
+                ),
+                to_attr="needed_ps",
+                filter_callback=lambda p: hasattr(p, "_prefetched_objects_cache")
+                and p._prefetched_objects_cache.get("current_order_ancestors")
+                and any(
+                    map(
+                        lambda o: o.c2_id is not None,
+                        p._prefetched_objects_cache.get(
+                            "current_o_ancestors"
+                        ).values(),
+                    )
+                ),
+                post_prefetch_callback=ventilate_ps_by_c_id,
+            ),
+            Prefetch(
+                f"{prefix}c2__u",
+                queryset=C2U.objects.filter(p2_id__isnull=False)
+                .distinct("c2_id")
+                .prefetch_related(
+                    "p2",
+                    Prefetch(
+                        f"p2__ps",
+                        queryset=(
+                            P.objects.filter(c_id=c_id)
+                            if c_id
+                            else P.objects.all()
+                        ),
+                        to_attr="needed_ps",
+                        post_prefetch_callback=ventilate_ps_by_c_id,
+                    ),
+                ),
+                to_attr="needed_u",
+                filter_callback=lambda c: (
+                    hasattr(c2, "_prefetched_objects_cache")
+                    and c2._prefetched_objects_cache.get("current_o_ancestors")
+                    and any(
+                        map(
+                            lambda o: o.c2_id is not None
+                            and o.s_id is None,
+                            c._prefetched_objects_cache.get(
+                                "current_o_ancestors"
+                            ).values(),
+                        )
+                    )
+                ),
+            ),
+        )
+
+
+class DModelSerializer(...):
+    ...
+
+    @staticmethod
+    def enhance_queryset(
+        query_set,
+        prefix: str = "",
+        c_id: Optional[CId] = None,
+    ):
+        query_set = SomeMixin2.enhance_queryset(
+            query_set,
+            f"{prefix}l__",
+        )
+        query_set = OModelSerializer.enhance_queryset(
+            query_set,
+            f"{prefix}l__",
+            c_id=c_id,
+        )
+        query_set = query_set.prefetch_related(
+            f"{prefix}l__s2",
+            f"{prefix}l__p3",
+            f"{prefix}l2__s3__u",
+            Prefetch(
+                f"{prefix}l__r1",
+                queryset=R1.objects.filter(
+                    d_id=F("o__s2__d_id"),
+                    r2__s4=SOME_CONSTANT,
+                ).select_related("r2"),
+                to_attr="pertinent_r3",
+            ),
+        )
+
+        return query_set
+
+So maybe now you understand why I do not understand framework maintainers
+that block any new feature not coming from them.
+I think we don't live in code of the same complexity.
 """
 
 import importlib
