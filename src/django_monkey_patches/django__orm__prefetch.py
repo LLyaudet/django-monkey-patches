@@ -1,15 +1,18 @@
 """
 This file is part of django-monkey-patches library.
 
-django-monkey-patches is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+django-monkey-patches is free software:
+you can redistribute it and/or modify it under the terms
+of the GNU Lesser General Public License
+as published by the Free Software Foundation,
+either version 3 of the License,
+or (at your option) any later version.
 
 django-monkey-patches is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
-GNU Lesser General Public License for more details.
+but WITHOUT ANY WARRANTY;
+without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with django-monkey-patches.
@@ -167,9 +170,13 @@ class DModelSerializer(...):
 
         return query_set
 
-So maybe now you understand why I do not understand framework maintainers
+So maybe now, you understand why I do not understand framework maintainers
 that block any new feature not coming from them.
 I think we don't live in code of the same complexity.
+I did a second PR, mainly because it can help (but it was rejected as usual),
+and because it can help for understanding this patch,
+and see that the modifications needed are only minor:
+https://github.com/django/django/pull/18003
 """
 
 import importlib

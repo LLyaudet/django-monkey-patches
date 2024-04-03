@@ -1,15 +1,18 @@
 """
 This file is part of django-monkey-patches library.
 
-django-monkey-patches is free software: you can redistribute it and/or modify
-it under the terms of the GNU Lesser General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+django-monkey-patches is free software:
+you can redistribute it and/or modify it under the terms
+of the GNU Lesser General Public License
+as published by the Free Software Foundation,
+either version 3 of the License,
+or (at your option) any later version.
 
 django-monkey-patches is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.    See the
-GNU Lesser General Public License for more details.
+but WITHOUT ANY WARRANTY;
+without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
 along with django-monkey-patches.
@@ -20,7 +23,7 @@ If not, see <http://www.gnu.org/licenses/>.
 Django Rest Framework is considered "feature-complete".
 But if you had the chance to work with an in-house framework
 like I did in PHP for 8,5 years,
-you know that there is no such thing as a "feature-complete" framework ;).
+you know that there is no such thing as a "feature-complete" framework :(.
 The goal of this patch is to have a sensible place to add unconventional prefetches.
 You may apply the patch,
 or use patched_to_representation_v1 in a class inheriting from ListSerializer.
