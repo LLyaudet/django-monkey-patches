@@ -8,18 +8,20 @@ as published by the Free Software Foundation,
 either version 3 of the License,
 or (at your option) any later version.
 
-django-monkey-patches is distributed in the hope that it will be useful,
+django-monkey-patches is distributed in the hope
+that it will be useful,
 but WITHOUT ANY WARRANTY;
 without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 See the GNU Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License
+You should have received a copy of
+the GNU Lesser General Public License
 along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
+---------------------------------------------------------------------
 A full-featured custom query wrapper and constants to control it,
 plus functions to customize part of its behavior.
 The goal is to give back full control to the developper
@@ -57,7 +59,8 @@ COUNT_QUERIES = False
 # you may want to use a log filter on django.db.backends.
 # But settings.DEBUG activates too many things
 # (bad frameworks use global constants that do everything,
-# good frameworks have atomic constants for anything to work in isolation,
+# good frameworks have atomic constants for anything to work
+# in isolation,
 # better frameworks choose carefully
 # the intermediate switches to add to the good frameworks.)
 # Bizarre, il me semblait déjà avoir écrit ça en commençant
@@ -174,7 +177,8 @@ def get_extra_data_template_for_set_of_queries_v1():
     That's the goal of the LGPL: if you improve this library code,
     please share with anyone.
     I will not sue you if you don't, since it is a border-line case.
-    Just adding "fields" and then using other functions without my code
+    Just adding "fields" and then using other functions
+    without my code
     or eventually wrapping mines may be subject to interpretation.
     Basically, I think that if you use your own additional "fields"
     and your own callbacks to fill/use the "fields" below,
@@ -216,15 +220,17 @@ def get_extra_data_template_for_set_of_queries_v1():
         "min_duration": float("inf"),
         "max_duration": 0,
         # ---------------------------------------------------------
-        # These fields could be at the top but it would be less didactic I think.
+        # These fields could be at the top,
+        # but it would be less didactic I think.
         # Two floats that will be compared to query duration
-        # for any query in ancestor subset,
-        # in case a comparison fails, the query is not counted in this subset.
+        # for any query in ancestor subset;
+        # in case a comparison fails,
+        # the query is not counted in this subset.
         "min_seconds_threshold": 0,
         "max_seconds_threshold": float("inf"),
         "filter_callback": None,
-        # Default will be to use query_fields, update total, min, max,
-        # and recurse on nested dicts.
+        # Default will be to use query_fields, update total,
+        # min, max, and recurse on nested dicts.
         "insertion_callback": None,
         # ---------------------------------------------------------
         "subsets_extra_data": {
@@ -236,31 +242,42 @@ def get_extra_data_template_for_set_of_queries_v1():
             # 22464900/do-dictionaries-have-a-key-length-limit
             # Value of dict can be the count or a full nested dict.
             # "distinct_call_stacks": {
-            #     f"{some_call_stack}": get_extra_data_template_for_set_of_queries(),
+            #     f"{some_call_stack}": (
+            #          get_extra_data_template_for_set_of_queries(),
+            #     )
             # },
         },
         "allocated_subsets_key_callback": {
             # "distinct_call_stacks": lambda x, y: y["call_stack"],
         },
         "allocated_subsets_init_callback": {
-            # "distinct_call_stacks": get_extra_data_template_for_set_of_queries,
+            # "distinct_call_stacks": (
+            #     get_extra_data_template_for_set_of_queries
+            # ),
         },
         # If you want an allocated_subsets_filter_callback,
         # because you want to allocate only a subset of queries,
-        # then you're invited to use one more nesting level with subsets_extra_data.
-        # Because it will avoid duplicating the currently three fields
+        # then you're invited to use one more nesting level
+        # with subsets_extra_data.
+        # Because it will avoid duplicating
+        # the, currently, three fields
         # used for filtering above.
-        # With the following callbacks, you can sort query_list, for example.
+        # With the following callbacks, you can sort query_list,
+        # for example.
         # But you may also reorder the nested dicts, etc.,
-        # and you can control if you want to synthetize bottom-up or top_down.
+        # and you can control if you want to synthetize
+        # bottom-up or top_down.
         "top_down_post_processing_callback": None,
         "bottom_up_post_processing_callback": None,
-        # If you need a mix of both, you should rewrite the top-down one.
+        # If you need a mix of both,
+        # you should rewrite the top-down one.
         # Thus, you can do things in the order that pleases you,
         # recurse when you want, etc.,
-        # and you can add flags in the dicts to avoid multi-post-processings
+        # and you can add flags in the dicts
+        # to avoid multi-post-processings
         # on recursed dicts.
-        # But clearly, in most cases, the bottom-up post processing makes more sense.
+        # But clearly, in most cases,
+        # the bottom-up post processing makes more sense.
         # (Think sorting sub-results, etc.)
     }
 
@@ -368,13 +385,14 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
         )
     insertion_callback = extra_data_dict["insertion_callback"]
     if insertion_callback is not None:
-        # You can keep track of nesting by altering data in this callback.
+        # You can keep track of nesting
+        # by altering data in this callback.
         insertion_callback(extra_data_dict, data)
     # -------------------------------------------------------
 
     # Recursion part ----------------------------------------
-    for some_extra_data_dict in extra_data_dict["subsets_extra_data"]:
-        insert_in_extra_data_dict_v1(some_extra_data_dict, data)
+    for some_dict in extra_data_dict["subsets_extra_data"]:
+        insert_in_extra_data_dict_v1(some_dict, data)
     for (
         allocated_subset_key,
         key_generator,
@@ -386,14 +404,16 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
         ]
         if sub_dict is None:
             raise ValueError(
-                f"allocated_subsets error: no sub_dict for {allocated_subset_key}"
+                "allocated_subsets error:"
+                f" no sub_dict for {allocated_subset_key}"
             )
         init_callback = extra_data_dict[
             "allocated_subsets_init_callback"
         ][allocated_subset_key]
         if init_callback is None:
             raise ValueError(
-                f"allocated_subsets error: no init_callback for {allocated_subset_key}"
+                "allocated_subsets error:"
+                f" no init_callback for {allocated_subset_key}"
             )
         some_key = key_generator(extra_data_dict, data)
         if sub_dict.get(some_key) is None:
@@ -435,8 +455,8 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
         processing_callback(extra_data_dict)
 
     # Recursion
-    for some_extra_data_dict in extra_data_dict["subsets_extra_data"]:
-        synthetize_extra_data_dict_v1(some_extra_data_dict)
+    for some_dict in extra_data_dict["subsets_extra_data"]:
+        synthetize_extra_data_dict_v1(some_dict)
     for sub_dict in extra_data_dict[
         "allocated_subsets_extra_data"
     ].values():
@@ -451,5 +471,6 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
         processing_callback(extra_data_dict)
 
 
-# You should extract the data to logs or files during execution or at the end
+# You should extract the data to logs or files,
+# during execution or at the end,
 # using custom insertion_callback or post_processing_callback.
