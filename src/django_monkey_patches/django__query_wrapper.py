@@ -101,6 +101,45 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
     You should be able to do anything you want with it.
     Below, are given data structures and a POST_EXECUTION_CALLBACK
     that should handle most of your use cases.
+
+    Here is an example of how to use it with a middleware:
+
+    class CustomQueryWrapperMiddleware:
+        def __init__(self, get_response):
+            self.get_response = get_response
+
+        def __call__(self, request):
+            # Optional but recommended, see below.
+            # At least an equivalent is needed,
+            # if you activate COUNT_QUERIES.
+            init_connections_extra_data_v1()
+
+            with connection.execute_wrapper(custom_query_wrapper_v1):
+                return self.get_response(request)
+
+    In settings.py, add:
+    # ######### MIDDLEWARE CONFIGURATION
+    MIDDLEWARE = (
+        ...
+        "path_to.middlewares.CustomQueryWrapperMiddleware",
+        ...
+    )
+
+    If you want to use it in your commands, there is more work.
+    I recommend to define your own class:
+    class CustomBaseCommand(BaseCommand):
+        ...
+        def execute(self, *args, **options):
+            # Copy the code of BaseCommand.execute()
+            # And in it replace at least:
+            #   output = self.handle(*args, **options)
+            # with:
+            with connection.execute_wrapper(custom_query_wrapper_v1):
+                output = self.handle(*args, **options)
+        ...
+    And then, make all your commands inherit from CustomBaseCommand.
+    You can go way further
+    in this line of customization and monitoring.
     """
 
     if THROTTLE_QUERIES:
@@ -446,13 +485,14 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
                 local_data[field.field_name] = field(
                     extra_data_dict, data
                 )
+        extra_data_dict["query_list"].append(local_data)
     if data["duration"] is not None:
         extra_data_dict["total_duration"] += data["duration"]
         extra_data_dict["min_duration"] = min(
             extra_data_dict["min_duration"], data["duration"]
         )
         extra_data_dict["max_duration"] = max(
-            extra_data_dict["min_duration"], data["duration"]
+            extra_data_dict["max_duration"], data["duration"]
         )
     insertion_callback = extra_data_dict["insertion_callback"]
     if insertion_callback is not None:
@@ -528,13 +568,13 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
         processing_callback(extra_data_dict)
 
     # Recursion
-    for some_dict in extra_data_dict["subsets_extra_data"]:
+    for some_dict in extra_data_dict["subsets_extra_data"].values():
         synthetize_extra_data_dict_v1(some_dict)
     for sub_dict in extra_data_dict[
         "allocated_subsets_extra_data"
     ].values():
-        for some_extra_data_dict in sub_dict.values():
-            synthetize_extra_data_dict_v1(some_extra_data_dict)
+        for some_dict in sub_dict.values():
+            synthetize_extra_data_dict_v1(some_dict)
 
     # Bottom-up
     processing_callback = extra_data_dict[
@@ -577,3 +617,79 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
 # You should extract the data to logs or files,
 # during execution or at the end,
 # using custom insertion_callback or post_processing_callback.
+# Here is an example of intermediate complexity
+# using all of the above.
+#
+# import django_monkey_patches.django__query_wrapper
+# from django_monkey_patches.django__query_wrapper import (
+#     apply_reorder_dict_by_total_duration_of_sub_dicts_to,
+#     custom_query_wrapper_v1,
+#     get_extra_data_template_for_set_of_queries_v1,
+#     get_sql_signature_v1,
+#     init_connections_extra_data_v1,
+#     insert_in_connections_extra_data_v1,
+#     synthetize_connections_extra_data_v1,
+# )
+#
+# django__query_wrapper.COUNT_QUERIES = True
+# django__query_wrapper.TIME_QUERIES = True
+# django__query_wrapper.COMPUTE_CALL_STACK = True
+# django__query_wrapper.POST_EXECUTION_CALLBACK = (
+#     insert_in_connections_extra_data_v1
+# )
+#
+#
+# class CustomQueryWrapperMiddleware:
+#     def __init__(self, get_response):
+#         self.get_response = get_response
+#
+#     def __call__(self, request):
+#         init_connections_extra_data_v1()
+#         connection.django_monkey_patches_dict[
+#             "allocated_subsets_extra_data"
+#         ] = {"per_sql_signature_v1": {},}
+#         connection.django_monkey_patches_dict[
+#             "allocated_subsets_key_callback"
+#         ] = {"per_sql_signature_v1": get_sql_signature_v1,}
+#         connection.django_monkey_patches_dict[
+#             "allocated_subsets_init_callback"
+#         ] = {
+#             "per_sql_signature_v1": (
+#                 lambda x, y: (
+#                     get_extra_data_template_for_set_of_queries_v1(
+#                         query_fields=[
+#                             "sql",
+#                             "params",
+#                             "many",
+#                             "call_stack",
+#                             "start_time",
+#                             "result",
+#                             "end_time",
+#                             "duration",
+#                             get_full_query_v1
+#                         ],
+#                     )
+#                 )
+#             ),
+#         }
+#
+#         connection.django_monkey_patches_dict[
+#             "bottom_up_post_processing_callback"
+#         ] = (
+#             lambda x: (
+#               apply_reorder_dict_by_total_duration_of_sub_dicts_to(
+#                 x["allocated_subsets_extra_data"],
+#                 "per_sql_signature_v1",
+#               )
+#             )
+#         )
+#         with connection.execute_wrapper(custom_query_wrapper_v1):
+#             response = self.get_response(request)
+#             synthetize_connections_extra_data_v1()
+#             # dump to file or log:
+#             # connections.django_monkey_patches_dict
+#             # for connection_key in connections:
+#             #     some_connection = connections[connection_key]
+#             #     # dump to file or log:
+#             #     # some_connection.django_monkey_patches_dict
+#             return response
