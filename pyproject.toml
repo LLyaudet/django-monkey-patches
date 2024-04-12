@@ -7,14 +7,19 @@ build-backend = "hatchling.build"
 [project]
 name = "django-monkey-patches"
 version = "2.4.0"
-description = "Add monkey-patches to correct and enhance your favorite framework"
+description = """\
+Add monkey-patches to correct and enhance your favorite framework\
+"""
 readme = "README.md"
 authors = [
     { name = "Laurent Lyaudet", email = "laurent.lyaudet@gmail.com" },
 ]
 license = { file = "COPYING.LESSER" }
 classifiers = [
-    "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
+    """\
+License :: OSI Approved :: \
+GNU Lesser General Public License v3 or later (LGPLv3+)\
+""",
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
@@ -33,7 +38,9 @@ dev = [
 
 [project.urls]
 "Homepage" = "https://github.com/LLyaudet/django-monkey-patches"
-"Bug Tracker" = "https://github.com/LLyaudet/django-monkey-patches/issues"
+"Bug Tracker" = """\
+https://github.com/LLyaudet/django-monkey-patches/issues\
+"""
 
 [tool.black]
 line-length = 70

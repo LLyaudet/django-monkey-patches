@@ -68,46 +68,64 @@ See previous question.
 
 See previous question.
 
-[PyPI-version-badge]: https://img.shields.io/pypi/v/django-monkey-patches.svg
+[PyPI-version-badge]: https://img.shields.io/pypi/v/\
+django-monkey-patches.svg
 
 [PyPI-package-page]: https://pypi.org/project/django-monkey-patches/
 
-[Downloads-badge]: https://img.shields.io/pypi/dm/django-monkey-patches
+[Downloads-badge]: https://img.shields.io/pypi/dm/\
+django-monkey-patches
 
-[PyPIStats-package-page]: https://pypistats.org/packages/django-monkey-patches
+[PyPIStats-package-page]: https://pypistats.org/packages/\
+django-monkey-patches
 
-[Code-style:black:badge]: https://img.shields.io/badge/code%20style-black-000000.svg
+[Code-style:black:badge]: https://img.shields.io/badge/\
+code%20style-black-000000.svg
 
 [Black-GitHub.com]: https://github.com/psf/black
 
-[Imports:isort:badge]: https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336
+[Imports:isort:badge]: https://img.shields.io/badge/\
+%20imports-isort-%231674b1?style=flat&labelColor=ef8336
 
 [Isort-GitHub.io]: https://pycqa.github.io/isort/
 
-[Linting:pylint:badge]: https://img.shields.io/badge/linting-pylint-yellowgreen
+[Linting:pylint:badge]: https://img.shields.io/badge/\
+linting-pylint-yellowgreen
 
 [Pylint-GitHub.com]: https://github.com/pylint-dev/pylint
 
-[CodeFactor-badge]: https://www.codefactor.io/repository/github/llyaudet/django-monkey-patches/badge
+[CodeFactor-badge]: https://www.codefactor.io/repository/github/\
+llyaudet/django-monkey-patches/badge
 
-[CodeFactor-package-page]: https://www.codefactor.io/repository/github/llyaudet/django-monkey-patches
+[CodeFactor-package-page]: https://www.codefactor.io/repository/\
+github/llyaudet/django-monkey-patches
 
-[CodeClimateMaintainability-badge]: https://api.codeclimate.com/v1/badges/c928d2b8b724abcb2913/maintainability
+[CodeClimateMaintainability-badge]: https://api.codeclimate.com/v1/\
+badges/c928d2b8b724abcb2913/maintainability
 
-[CodeClimateM13y-package-page]: https://codeclimate.com/github/LLyaudet/django-monkey-patches/maintainability
+[CodeClimateM13y-package-page]: https://codeclimate.com/\
+github/LLyaudet/django-monkey-patches/maintainability
 
-[Codacy-badge]: https://app.codacy.com/project/badge/Grade/de6280433b32447684458fb655c3a4b3
+[Codacy-badge]: https://app.codacy.com/project/badge/Grade/\
+de6280433b32447684458fb655c3a4b3
 
-[Codacy-package-page]: https://app.codacy.com/gh/LLyaudet/django-monkey-patches/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade
+[Codacy-package-page]: https://app.codacy.com/gh/LLyaudet/\
+django-monkey-patches/dashboard?utm_source=gh&utm_medium=referral\
+&utm_content=&utm_campaign=Badge_grade
 
-[GitHub-top-language-badge]: https://img.shields.io/github/languages/top/llyaudet/django-monkey-patches
+[GitHub-top-language-badge]: https://img.shields.io/github/\
+languages/top/llyaudet/django-monkey-patches
 
-[GitHub-license-badge]: https://img.shields.io/github/license/llyaudet/django-monkey-patches
+[GitHub-license-badge]: https://img.shields.io/github/license/\
+llyaudet/django-monkey-patches
 
-[PyPI-python-version-badge]: https://img.shields.io/pypi/pyversions/django-monkey-patches
+[PyPI-python-version-badge]: https://img.shields.io/pypi/pyversions/\
+django-monkey-patches
 
-[GitHub-code-size-in-bytes-badge]: https://img.shields.io/github/languages/code-size/llyaudet/django-monkey-patches
+[GitHub-code-size-in-bytes-badge]: https://img.shields.io/github/\
+languages/code-size/llyaudet/django-monkey-patches
 
-[GitHub-sponsors-badge]: https://img.shields.io/github/sponsors/LLyaudet
+[GitHub-sponsors-badge]: https://img.shields.io/github/sponsors/\
+LLyaudet
 
 [GitHub-sponsors-page]: https://github.com/sponsors/LLyaudet
