@@ -247,7 +247,7 @@ def get_light_call_stack_v1(extra_data_dict, data):
     return [
         line
         for line in data["call_stack"]
-        if not "site-packages/" in line
+        if "site-packages/" not in line
     ]
 
 
