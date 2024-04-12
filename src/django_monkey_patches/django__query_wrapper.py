@@ -102,6 +102,7 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
     Below, are given data structures and a POST_EXECUTION_CALLBACK
     that should handle most of your use cases.
     """
+
     if THROTTLE_QUERIES:
         time.sleep(QUERY_PENALTY_MILLISECONDS / 1000)
 
@@ -161,6 +162,7 @@ def get_full_query_v1(extra_data_dict, data):
     An helper function to see the request
     as it will be transmitted to the DBMS.
     """
+
     connection = data["context"]["connection"]
     return connection.cursor().mogrify(data["sql"], data["params"])
 
@@ -188,12 +190,14 @@ def get_sql_signature_v1(extra_data_dict, data):
     what we had at Teliae when I was working there.
     But the ideas here both stem from my work at Teliae and Deleev.
     """
+
     return params_placeholders_regexp.sub("", data["sql"])
 
 
 get_sql_signature_v1.field_name = "sql_signature_v1"
 
 
+# pylint: disable-next=too-many-arguments
 def get_extra_data_template_for_set_of_queries_v1(
     query_fields=None,
     min_seconds_threshold=0,
@@ -250,7 +254,7 @@ def get_extra_data_template_for_set_of_queries_v1(
         #     "end_time",
         #     "duration",
         #     get_full_query_v1,  # This is a function
-        #],
+        # ],
         "query_list": [
             # {
             #     "execute": None,
@@ -287,7 +291,7 @@ def get_extra_data_template_for_set_of_queries_v1(
         # ------------------------------------------------------------
         "subsets_extra_data": subsets_extra_data,  # {
         #     "main": get_extra_data_template_for_set_of_queries(),
-        #},
+        # },
         "allocated_subsets_extra_data": allocated_subsets_extra_data,
         # {
         #   Beware of recursive calls
@@ -350,10 +354,12 @@ def init_connections_extra_data_v1():
     You should call this function or a custom one
     before using the custom query wrapper.
     """
+
     connections.django_monkey_patches_dict = (
         get_extra_data_template_for_set_of_queries_v1()
     )
-    for connection in connections:
+    for connection_key in connections:
+        connection = connections[connection_key]
         connection.django_monkey_patches_dict = (
             get_extra_data_template_for_set_of_queries_v1()
         )
@@ -376,6 +382,7 @@ def insert_in_connections_extra_data_v1(
     The entry-point function to insert query data in relevant dicts.
     It should be your default POST_EXECUTION_CALLBACK.
     """
+
     all_dicts = [
         connections.django_monkey_patches_dict,
         context["connection"].django_monkey_patches_dict,
@@ -403,6 +410,7 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
     The recursive function used to insert the data of a query
     in all relevant dicts.
     """
+
     # Filtering part -------------------------------------------------
     if data["duration"] is not None:
         # /!\ check list: you did activate TIME_QUERIES?
@@ -490,10 +498,11 @@ def synthetize_connections_extra_data_v1():
     The entry-point function to call synthetize_extra_data_dict()
     on all root extra data dicts.
     """
+
     extra_data_dicts = [connections.django_monkey_patches_dict]
     extra_data_dicts.extend(
-        connection.django_monkey_patches_dict
-        for connection in connections
+        connections[connection_key].django_monkey_patches_dict
+        for connection_key in connections
     )
     for extra_data_dict in extra_data_dicts:
         synthetize_extra_data_dict_v1(extra_data_dict)
@@ -504,6 +513,7 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
     The recursive function used to synthetize
     the results at the end.
     """
+
     if extra_data_dict["query_count"] > 0:
         extra_data_dict["average_duration"] = (
             extra_data_dict["total_duration"]
@@ -535,7 +545,13 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
 
 
 def reorder_dict_by_total_duration_of_sub_dicts(some_dict):
-    couples_list = [(key, value) for key, value in some_dict.items()]
+    """
+    A common tool to visualize the result of profiling DB queries
+    is to see at the top
+    similar queries where most of the time is spent.
+    """
+
+    couples_list = list(some_dict.items())
     couples_list.sort(
         key=lambda x: x[1]["total_duration"],
         reverse=True,
@@ -547,6 +563,10 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
     main_dict,
     some_sub_dict_key,
 ):
+    """
+    This function simplifies use of the previous one.
+    """
+
     main_dict[some_sub_dict_key] = (
         reorder_dict_by_total_duration_of_sub_dicts(
             main_dict[some_sub_dict_key]
