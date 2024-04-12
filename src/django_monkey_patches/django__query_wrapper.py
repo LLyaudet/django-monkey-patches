@@ -553,7 +553,7 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
 
 def synthetize_connections_extra_data_v1():
     """
-    The entry-point function to call synthetize_extra_data_dict()
+    The entry-point function to call synthetize_extra_data_dict_v1()
     on all root extra data dicts.
     """
 
@@ -649,7 +649,15 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
 #     synthetize_connections_extra_data_v1,
 # )
 #
-# django__query_wrapper.COUNT_QUERIES = True
+# # /!\ Beware of double counting that may occur when you use
+# # COUNT_QUERIES and insert_in_connections_extra_data_v1
+# # simultaneously.
+# # If you want to monitor COUNT_QUERIES all the time,
+# # and activate something else more rarely,
+# # you have 2 possibilities : unactivate COUNT_QUERIES when needed,
+# # or activate insert_in_connections_extra_data_v1
+# # with an insertion_callback that will cancel the double counting.
+# # django__query_wrapper.COUNT_QUERIES = True
 # django__query_wrapper.TIME_QUERIES = True
 # django__query_wrapper.COMPUTE_CALL_STACK = True
 # django__query_wrapper.POST_EXECUTION_CALLBACK = (
