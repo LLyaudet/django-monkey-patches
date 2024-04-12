@@ -29,6 +29,7 @@ by enabling debug, etc. that will be localized to a problem to solve
 without making the whole application unusable/slow in production.
 """
 
+import re
 import time
 import traceback
 
@@ -68,7 +69,7 @@ COUNT_QUERIES = False
 # Mais là, plus de trace sur mon ordi.
 # Je me fais laver le cerveau un peu trop souvent.
 # Autre truc marrant, la recherche GitHub sur le mot atomic
-# ne trouve rien dans mon repo dajngo-monkey-patches,
+# ne trouve rien dans mon repo django-monkey-patches,
 # alors que le push a plus de 5 heures d'ancienneté
 # (grep c'est compliqué comme feature ?).
 TIME_QUERIES = False
@@ -167,7 +168,45 @@ def get_full_query_v1(extra_data_dict, data):
 get_full_query_v1.field_name = "full_query_v1"
 
 
-def get_extra_data_template_for_set_of_queries_v1():
+params_placeholders_regexp = re.compile("%s(,%s)*")
+
+
+# pylint: disable-next=unused-argument
+def get_sql_signature_v1(extra_data_dict, data):
+    """
+    An helper function to get an SQL signature
+    where the params have no impact.
+    It is somewhat similar to a technique we used at Teliae.
+    Jérôme Petit added an activable dump of all queries
+    and progressively improved the profiling tool,
+    with help of other team members including me,
+    this kind of signature was used to group requests together.
+    But since our in-house framework was rarely using
+    prepared statements,
+    the code to obtain an "SQL signature" was different.
+    All the code in this file is more general and flexible than
+    what we had at Teliae when I was working there.
+    But the ideas here both stem from my work at Teliae and Deleev.
+    """
+    return params_placeholders_regexp.sub("", data["sql"])
+
+
+get_sql_signature_v1.field_name = "sql_signature_v1"
+
+
+def get_extra_data_template_for_set_of_queries_v1(
+    query_fields=None,
+    min_seconds_threshold=0,
+    max_seconds_threshold=float("inf"),
+    filter_callback=None,
+    insertion_callback=None,
+    subsets_extra_data=None,
+    allocated_subsets_extra_data=None,
+    allocated_subsets_key_callback=None,
+    allocated_subsets_init_callback=None,
+    top_down_post_processing_callback=None,
+    bottom_up_post_processing_callback=None,
+):
     """
     Obtain a default extra_data_dict with most of
     the interesting "fields" regarding DB queries analysis.
@@ -185,21 +224,33 @@ def get_extra_data_template_for_set_of_queries_v1():
     you have no obligation at all.
     But it would be nice to contribute anyway.
     """
+
+    if query_fields is None:
+        query_fields = []
+    if subsets_extra_data is None:
+        subsets_extra_data = {}
+    if allocated_subsets_extra_data is None:
+        allocated_subsets_extra_data = {}
+    if allocated_subsets_key_callback is None:
+        allocated_subsets_key_callback = {}
+    if allocated_subsets_init_callback is None:
+        allocated_subsets_init_callback = {}
+
     return {
         "query_count": 0,
-        "query_fields": [
-            # "execute",
-            # "sql",
-            # "params",
-            # "many",
-            # "context",
-            # "call_stack",
-            # "start_time",
-            # "result",
-            # "end_time",
-            # "duration",
-            # get_full_query_v1,  # This is a function
-        ],
+        "query_fields": query_fields,  # [
+        #     "execute",
+        #     "sql",
+        #     "params",
+        #     "many",
+        #     "context",
+        #     "call_stack",
+        #     "start_time",
+        #     "result",
+        #     "end_time",
+        #     "duration",
+        #     get_full_query_v1,  # This is a function
+        #],
         "query_list": [
             # {
             #     "execute": None,
@@ -213,7 +264,7 @@ def get_extra_data_template_for_set_of_queries_v1():
             #     "end_time": None,
             #     "duration": None,
             #     "full_query_v1": None,
-            # }
+            # },
         ],
         "total_duration": 0,
         "average_duration": 0,
@@ -226,35 +277,43 @@ def get_extra_data_template_for_set_of_queries_v1():
         # for any query in ancestor subset;
         # in case a comparison fails,
         # the query is not counted in this subset.
-        "min_seconds_threshold": 0,
-        "max_seconds_threshold": float("inf"),
-        "filter_callback": None,
+        "min_seconds_threshold": min_seconds_threshold,  # 0,
+        # float("inf"),
+        "max_seconds_threshold": max_seconds_threshold,
+        "filter_callback": filter_callback,  # None,
         # Default will be to use query_fields, update total,
         # min, max, and recurse on nested dicts.
-        "insertion_callback": None,
+        "insertion_callback": insertion_callback,  # None,
         # ------------------------------------------------------------
-        "subsets_extra_data": {
-            # "main": get_extra_data_template_for_set_of_queries(),
-        },
-        "allocated_subsets_extra_data": {
-            # Beware of recursive calls
-            # https://stackoverflow.com/questions/
-            # 22464900/do-dictionaries-have-a-key-length-limit
-            # Value of dict can be the count or a full nested dict.
-            # "distinct_call_stacks": {
-            #     f"{some_call_stack}": (
-            #          get_extra_data_template_for_set_of_queries(),
-            #     )
+        "subsets_extra_data": subsets_extra_data,  # {
+        #     "main": get_extra_data_template_for_set_of_queries(),
+        #},
+        "allocated_subsets_extra_data": allocated_subsets_extra_data,
+        # {
+        #   Beware of recursive calls
+        #   https://stackoverflow.com/questions/
+        #   22464900/do-dictionaries-have-a-key-length-limit
+        #   Value of dict can be the count or a full nested dict.
+        #   "distinct_call_stacks": {
+        #     f"{some_call_stack}": (
+        #       get_extra_data_template_for_set_of_queries(),
+        #     )
+        #   },
+        # },
+        "allocated_subsets_key_callback": (
+            allocated_subsets_key_callback
+            # {
+            #   "distinct_call_stacks": lambda x, y: y["call_stack"],
             # },
-        },
-        "allocated_subsets_key_callback": {
-            # "distinct_call_stacks": lambda x, y: y["call_stack"],
-        },
-        "allocated_subsets_init_callback": {
-            # "distinct_call_stacks": (
+        ),
+        "allocated_subsets_init_callback": (
+            allocated_subsets_init_callback
+            # {
+            #   "distinct_call_stacks": (
             #     get_extra_data_template_for_set_of_queries
-            # ),
-        },
+            #   ),
+            # },
+        ),
         # If you want an allocated_subsets_filter_callback,
         # because you want to allocate only a subset of queries,
         # then you're invited to use one more nesting level
@@ -267,8 +326,12 @@ def get_extra_data_template_for_set_of_queries_v1():
         # But you may also reorder the nested dicts, etc.,
         # and you can control if you want to synthetize
         # bottom-up or top_down.
-        "top_down_post_processing_callback": None,
-        "bottom_up_post_processing_callback": None,
+        "top_down_post_processing_callback": (
+            top_down_post_processing_callback  # None
+        ),
+        "bottom_up_post_processing_callback": (
+            bottom_up_post_processing_callback  # None
+        ),
         # If you need a mix of both,
         # you should rewrite the top-down one.
         # Thus, you can do things in the order that pleases you,
@@ -469,6 +532,26 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
     ]
     if processing_callback is not None:
         processing_callback(extra_data_dict)
+
+
+def reorder_dict_by_total_duration_of_sub_dicts(some_dict):
+    couples_list = [(key, value) for key, value in some_dict.items()]
+    couples_list.sort(
+        key=lambda x: x[1]["total_duration"],
+        reverse=True,
+    )
+    return dict(couples_list)
+
+
+def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
+    main_dict,
+    some_sub_dict_key,
+):
+    main_dict[some_sub_dict_key] = (
+        reorder_dict_by_total_duration_of_sub_dicts(
+            main_dict[some_sub_dict_key]
+        )
+    )
 
 
 # You should extract the data to logs or files,
