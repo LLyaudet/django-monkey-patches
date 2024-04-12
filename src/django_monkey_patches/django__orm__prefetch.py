@@ -21,7 +21,7 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
+----------------------------------------------------------------------
 To optimize some queries, you may need to add prefetches
 that apply only to some of the instances.
 It is very convenient when you have some expensive prefetches
@@ -71,16 +71,24 @@ class OModelSerializer(...):
             f"{prefix}p2",
             Prefetch(
                 f"{prefix}s",
-                post_prefetch_callback=create_post_prefetch_callback_add_backward_multiple(
-                    retrieve_forward_cache_callback=lambda o: [o.s] if o.s_id else [],
+                post_prefetch_callback=(
+                  create_post_prefetch_callback_add_backward_multiple(
+                    retrieve_forward_cache_callback=lambda o: [o.s]
+                    if o.s_id
+                    else [],
                     backward_cache_name="current_o_ancestors",
+                  )
                 ),
             ),
             Prefetch(
                 f"{prefix}c2",
-                post_prefetch_callback=create_post_prefetch_callback_add_backward_multiple(
-                    retrieve_forward_cache_callback=lambda o:[o.c2] if o.c2_id else [],
+                post_prefetch_callback=(
+                  create_post_prefetch_callback_add_backward_multiple(
+                    retrieve_forward_cache_callback=lambda o:[o.c2]
+                    if o.c2_id
+                    else [],
                     backward_cache_name="current_order_ancestors",
+                  )
                 ),
             ),
             Prefetch(
@@ -91,8 +99,12 @@ class OModelSerializer(...):
                     else P.objects.all()
                 ),
                 to_attr="needed_ps",
-                filter_callback=lambda p: hasattr(p, "_prefetched_objects_cache")
-                and p._prefetched_objects_cache.get("current_order_ancestors")
+                filter_callback=(
+                  lambda p: hasattr(p, "_prefetched_objects_cache")
+                )
+                and p._prefetched_objects_cache.get(
+                    "current_order_ancestors"
+                )
                 and any(
                     map(
                         lambda o: o.c2_id is not None,
@@ -123,7 +135,9 @@ class OModelSerializer(...):
                 to_attr="needed_u",
                 filter_callback=lambda c: (
                     hasattr(c2, "_prefetched_objects_cache")
-                    and c2._prefetched_objects_cache.get("current_o_ancestors")
+                    and c2._prefetched_objects_cache.get(
+                        "current_o_ancestors"
+                    )
                     and any(
                         map(
                             lambda o: o.c2_id is not None
@@ -172,10 +186,12 @@ class DModelSerializer(...):
 
         return query_set
 
-So maybe now, you understand why I do not understand framework maintainers
+So maybe now, you understand why
+I do not understand framework maintainers
 that block any new feature not coming from them.
 I think we don't live in code of the same complexity.
-I did a second PR, mainly because it can help (but it was rejected as usual),
+I did a second PR,
+mainly because it can help (but it was rejected as usual),
 and because it can help for understanding this patch,
 and see that the modifications needed are only minor:
 https://github.com/django/django/pull/18003
@@ -288,13 +304,15 @@ source = (
         "if lookup.prefetch_to in done_queries:",
         "if lookup.prefetch_to in done_queries:\n"
         "            if lookup.post_prefetch_callback:\n"
-        "                lookup.post_prefetch_callback(lookup, done_queries)\n",
+        "                lookup.post_prefetch_callback("
+        "lookup, done_queries)\n",
     )
     .replace(
         "obj_list = new_obj_list",
         "obj_list = new_obj_list\n"
         "        if lookup.post_prefetch_callback:\n"
-        "            lookup.post_prefetch_callback(lookup, done_queries)\n",
+        "            lookup.post_prefetch_callback("
+        "lookup, done_queries)\n",
     )
 )
 

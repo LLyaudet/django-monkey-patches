@@ -21,15 +21,17 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
+----------------------------------------------------------------------
 Django Rest Framework is considered "feature-complete".
 But if you had the chance to work with an in-house framework
 like I did in PHP for 8,5 years,
-you know that there is no such thing as a "feature-complete" framework ;).
-The goal of this patch is to shorten application code with small helpers
-for accessing request in serializers.
+you know that there is no such thing as
+a "feature-complete" framework ;).
+The goal of this patch is to shorten application code
+with small helpers for accessing request in serializers.
 https://github.com/encode/django-rest-framework/issues/8457
-Field class introduces the context property and BaseSerializer inherits of Field,
+Field class introduces the context property,
+and BaseSerializer inherits of Field,
 so the right place to add this helper functions is Field.
 """
 

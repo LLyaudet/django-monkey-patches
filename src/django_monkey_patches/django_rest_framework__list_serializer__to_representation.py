@@ -21,14 +21,17 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
+----------------------------------------------------------------------
 Django Rest Framework is considered "feature-complete".
 But if you had the chance to work with an in-house framework
 like I did in PHP for 8,5 years,
-you know that there is no such thing as a "feature-complete" framework :(.
-The goal of this patch is to have a sensible place to add unconventional prefetches.
+you know that there is no such thing as
+a "feature-complete" framework :(.
+The goal of this patch is to have a sensible place
+to add unconventional prefetches.
 You may apply the patch,
-or use patched_to_representation_v1 in a class inheriting from ListSerializer.
+or use patched_to_representation_v1
+in a class inheriting from ListSerializer.
 """
 
 # pylint: disable-next=import-error

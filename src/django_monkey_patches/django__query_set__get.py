@@ -21,8 +21,9 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
-There is an inconsistency in behavior of current QuerySet.get_or_create():
+----------------------------------------------------------------------
+There is an inconsistency in behavior
+of current QuerySet.get_or_create():
 It avoids unnecessary DB query for related object given as argument
 only if created is True.
 I gave a script demonstrating this here:

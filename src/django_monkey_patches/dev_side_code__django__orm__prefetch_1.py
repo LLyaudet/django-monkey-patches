@@ -21,8 +21,9 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
-The goal of dev_side_code files is to keep code that should not be used
+----------------------------------------------------------------------
+The goal of dev_side_code files is to keep code
+that should not be used
 but was used to create the best code possible in some patches.
 Below, is the code for micro-optimisations of
 retrieve_forward_cache_callback_for_foreign_key.
@@ -1334,8 +1335,8 @@ callbacks.update(
         "c_field_not_none_list_list": cc_field_not_none_list_list(
             "field_name"
         ),
-        "c_field_id_not_none_list_list": cc_field_id_not_none_list_list(
-            "field_name"
+        "c_field_id_not_none_list_list": (
+            cc_field_id_not_none_list_list("field_name")
         ),
         "c_field_none_list_list": cc_field_none_list_list(
             "field_name"
@@ -1350,8 +1351,8 @@ callbacks.update(
         "c_field_not_none_tuple_tuple": cc_field_not_none_tuple_tuple(
             "field_name"
         ),
-        "c_field_id_not_none_tuple_tuple": cc_field_id_not_none_tuple_tuple(
-            "field_name"
+        "c_field_id_not_none_tuple_tuple": (
+            cc_field_id_not_none_tuple_tuple("field_name")
         ),
         "c_field_none_tuple_tuple": cc_field_none_tuple_tuple(
             "field_name"
@@ -1364,8 +1365,8 @@ callbacks.update(
         "c_field_not_none_list_tuple": cc_field_not_none_list_tuple(
             "field_name"
         ),
-        "c_field_id_not_none_list_tuple": cc_field_id_not_none_list_tuple(
-            "field_name"
+        "c_field_id_not_none_list_tuple": (
+            cc_field_id_not_none_list_tuple("field_name")
         ),
         "c_field_none_list_tuple": cc_field_none_list_tuple(
             "field_name"
@@ -1378,8 +1379,8 @@ callbacks.update(
         "c_field_not_none_tuple_list": cc_field_not_none_tuple_list(
             "field_name"
         ),
-        "c_field_id_not_none_tuple_list": cc_field_id_not_none_tuple_list(
-            "field_name"
+        "c_field_id_not_none_tuple_list": (
+            cc_field_id_not_none_tuple_list("field_name")
         ),
         "c_field_none_tuple_list": cc_field_none_tuple_list(
             "field_name"
@@ -1394,8 +1395,8 @@ callbacks.update(
         "c_field_not_none_tuple_empty": cc_field_not_none_tuple_empty(
             "field_name"
         ),
-        "c_field_id_not_none_tuple_empty": cc_field_id_not_none_tuple_empty(
-            "field_name"
+        "c_field_id_not_none_tuple_empty": (
+            cc_field_id_not_none_tuple_empty("field_name")
         ),
         "c_field_none_tuple_empty": cc_field_none_tuple_empty(
             "field_name"
@@ -1408,8 +1409,8 @@ callbacks.update(
         "c_field_not_none_list_empty": cc_field_not_none_list_empty(
             "field_name"
         ),
-        "c_field_id_not_none_list_empty": cc_field_id_not_none_list_empty(
-            "field_name"
+        "c_field_id_not_none_list_empty": (
+            cc_field_id_not_none_list_empty("field_name")
         ),
         "c_field_none_list_empty": cc_field_none_list_empty(
             "field_name"
@@ -1421,17 +1422,17 @@ callbacks.update(
         "c_field_id_list_list_nnl": cc_field_id_list_list_nnl(
             "field_name"
         ),
-        "c_field_not_none_list_list_nnl": cc_field_not_none_list_list_nnl(
-            "field_name"
+        "c_field_not_none_list_list_nnl": (
+            cc_field_not_none_list_list_nnl("field_name")
         ),
-        "c_field_id_not_none_list_list_nnl": cc_field_id_not_none_list_list_nnl(
-            "field_name"
+        "c_field_id_not_none_list_list_nnl": (
+            cc_field_id_not_none_list_list_nnl("field_name")
         ),
         "c_field_none_list_list_nnl": cc_field_none_list_list_nnl(
             "field_name"
         ),
-        "c_field_id_none_list_list_nnl": cc_field_id_none_list_list_nnl(
-            "field_name"
+        "c_field_id_none_list_list_nnl": (
+            cc_field_id_none_list_list_nnl("field_name")
         ),
         "c_field_tuple_tuple_nnl": cc_field_tuple_tuple_nnl(
             "field_name"
@@ -1439,35 +1440,35 @@ callbacks.update(
         "c_field_id_tuple_tuple_nnl": cc_field_id_tuple_tuple_nnl(
             "field_name"
         ),
-        "c_field_not_none_tuple_tuple_nnl": cc_field_not_none_tuple_tuple_nnl(
-            "field_name"
+        "c_field_not_none_tuple_tuple_nnl": (
+            cc_field_not_none_tuple_tuple_nnl("field_name")
         ),
-        "c_field_id_not_none_tuple_tuple_nnl": cc_field_id_not_none_tuple_tuple_nnl(
-            "field_name"
+        "c_field_id_not_none_tuple_tuple_nnl": (
+            cc_field_id_not_none_tuple_tuple_nnl("field_name")
         ),
-        "c_field_none_tuple_tuple_nnl": cc_field_none_tuple_tuple_nnl(
-            "field_name"
+        "c_field_none_tuple_tuple_nnl": (
+            cc_field_none_tuple_tuple_nnl("field_name")
         ),
-        "c_field_id_none_tuple_tuple_nnl": cc_field_id_none_tuple_tuple_nnl(
-            "field_name"
+        "c_field_id_none_tuple_tuple_nnl": (
+            cc_field_id_none_tuple_tuple_nnl("field_name")
         ),
-        "c_field_list_tuple_nnl": cc_field_list_tuple_nnl(
-            "field_name"
+        "c_field_list_tuple_nnl": (
+            cc_field_list_tuple_nnl("field_name")
         ),
         "c_field_id_list_tuple_nnl": cc_field_id_list_tuple_nnl(
             "field_name"
         ),
-        "c_field_not_none_list_tuple_nnl": cc_field_not_none_list_tuple_nnl(
-            "field_name"
+        "c_field_not_none_list_tuple_nnl": (
+            cc_field_not_none_list_tuple_nnl("field_name")
         ),
-        "c_field_id_not_none_list_tuple_nnl": cc_field_id_not_none_list_tuple_nnl(
-            "field_name"
+        "c_field_id_not_none_list_tuple_nnl": (
+            cc_field_id_not_none_list_tuple_nnl("field_name")
         ),
         "c_field_none_list_tuple_nnl": cc_field_none_list_tuple_nnl(
             "field_name"
         ),
-        "c_field_id_none_list_tuple_nnl": cc_field_id_none_list_tuple_nnl(
-            "field_name"
+        "c_field_id_none_list_tuple_nnl": (
+            cc_field_id_none_list_tuple_nnl("field_name")
         ),
         "c_field_tuple_list_nnl": cc_field_tuple_list_nnl(
             "field_name"
@@ -1475,17 +1476,17 @@ callbacks.update(
         "c_field_id_tuple_list_nnl": cc_field_id_tuple_list_nnl(
             "field_name"
         ),
-        "c_field_not_none_tuple_list_nnl": cc_field_not_none_tuple_list_nnl(
-            "field_name"
+        "c_field_not_none_tuple_list_nnl": (
+            cc_field_not_none_tuple_list_nnl("field_name")
         ),
-        "c_field_id_not_none_tuple_list_nnl": cc_field_id_not_none_tuple_list_nnl(
-            "field_name"
+        "c_field_id_not_none_tuple_list_nnl": (
+            cc_field_id_not_none_tuple_list_nnl("field_name")
         ),
         "c_field_none_tuple_list_nnl": cc_field_none_tuple_list_nnl(
             "field_name"
         ),
-        "c_field_id_none_tuple_list_nnl": cc_field_id_none_tuple_list_nnl(
-            "field_name"
+        "c_field_id_none_tuple_list_nnl": (
+            cc_field_id_none_tuple_list_nnl("field_name")
         ),
         "c_field_tuple_empty_nnl": cc_field_tuple_empty_nnl(
             "field_name"
@@ -1493,17 +1494,17 @@ callbacks.update(
         "c_field_id_tuple_empty_nnl": cc_field_id_tuple_empty_nnl(
             "field_name"
         ),
-        "c_field_not_none_tuple_empty_nnl": cc_field_not_none_tuple_empty_nnl(
-            "field_name"
+        "c_field_not_none_tuple_empty_nnl": (
+            cc_field_not_none_tuple_empty_nnl("field_name")
         ),
-        "c_field_id_not_none_tuple_empty_nnl": cc_field_id_not_none_tuple_empty_nnl(
-            "field_name"
+        "c_field_id_not_none_tuple_empty_nnl": (
+            cc_field_id_not_none_tuple_empty_nnl("field_name")
         ),
         "c_field_none_tuple_empty_nnl": cc_field_none_tuple_empty_nnl(
             "field_name"
         ),
-        "c_field_id_none_tuple_empty_nnl": cc_field_id_none_tuple_empty_nnl(
-            "field_name"
+        "c_field_id_none_tuple_empty_nnl": (
+            cc_field_id_none_tuple_empty_nnl("field_name")
         ),
         "c_field_list_empty_nnl": cc_field_list_empty_nnl(
             "field_name"
@@ -1511,17 +1512,17 @@ callbacks.update(
         "c_field_id_list_empty_nnl": cc_field_id_list_empty_nnl(
             "field_name"
         ),
-        "c_field_not_none_list_empty_nnl": cc_field_not_none_list_empty_nnl(
-            "field_name"
+        "c_field_not_none_list_empty_nnl": (
+            cc_field_not_none_list_empty_nnl("field_name")
         ),
-        "c_field_id_not_none_list_empty_nnl": cc_field_id_not_none_list_empty_nnl(
-            "field_name"
+        "c_field_id_not_none_list_empty_nnl": (
+            cc_field_id_not_none_list_empty_nnl("field_name")
         ),
         "c_field_none_list_empty_nnl": cc_field_none_list_empty_nnl(
             "field_name"
         ),
-        "c_field_id_none_list_empty_nnl": cc_field_id_none_list_empty_nnl(
-            "field_name"
+        "c_field_id_none_list_empty_nnl": (
+            cc_field_id_none_list_empty_nnl("field_name")
         ),
     }
 )
@@ -1564,7 +1565,7 @@ def benchmark(callbacks_to_benchmark):
 # Benchmark each callback.
 benchmark(callbacks)
 
-print("-------------------------------------------------------")
+print("-------------------------------------------------------------")
 
 # Benchmark each callback in random order.
 keys = list(callbacks.keys())

@@ -21,7 +21,7 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
----------------------------------------------------------------------
+----------------------------------------------------------------------
 A full-featured custom query wrapper and constants to control it,
 plus functions to customize part of its behavior.
 The goal is to give back full control to the developper
@@ -219,7 +219,7 @@ def get_extra_data_template_for_set_of_queries_v1():
         "average_duration": 0,
         "min_duration": float("inf"),
         "max_duration": 0,
-        # ---------------------------------------------------------
+        # ------------------------------------------------------------
         # These fields could be at the top,
         # but it would be less didactic I think.
         # Two floats that will be compared to query duration
@@ -232,7 +232,7 @@ def get_extra_data_template_for_set_of_queries_v1():
         # Default will be to use query_fields, update total,
         # min, max, and recurse on nested dicts.
         "insertion_callback": None,
-        # ---------------------------------------------------------
+        # ------------------------------------------------------------
         "subsets_extra_data": {
             # "main": get_extra_data_template_for_set_of_queries(),
         },
@@ -340,7 +340,7 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
     The recursive function used to insert the data of a query
     in all relevant dicts.
     """
-    # Filtering part ----------------------------------------
+    # Filtering part -------------------------------------------------
     if data["duration"] is not None:
         # /!\ check list: you did activate TIME_QUERIES?
         if (
@@ -359,9 +359,9 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
         extra_data_dict, data
     ):
         return
-    # -------------------------------------------------------
+    # ----------------------------------------------------------------
 
-    # Insertion part ----------------------------------------
+    # Insertion part -------------------------------------------------
     extra_data_dict["query_count"] += 1
     fields = extra_data_dict["query_fields"]
     if len(fields) > 0:
@@ -388,9 +388,9 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
         # You can keep track of nesting
         # by altering data in this callback.
         insertion_callback(extra_data_dict, data)
-    # -------------------------------------------------------
+    # ----------------------------------------------------------------
 
-    # Recursion part ----------------------------------------
+    # Recursion part -------------------------------------------------
     for some_dict in extra_data_dict["subsets_extra_data"]:
         insert_in_extra_data_dict_v1(some_dict, data)
     for (
@@ -419,7 +419,7 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
         if sub_dict.get(some_key) is None:
             sub_dict[some_key] = init_callback(extra_data_dict, data)
         insert_in_extra_data_dict_v1(sub_dict[some_key], data)
-    # -------------------------------------------------------
+    # ----------------------------------------------------------------
 
 
 def synthetize_connections_extra_data_v1():

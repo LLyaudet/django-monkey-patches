@@ -21,7 +21,7 @@ along with django-monkey-patches.
 If not, see <http://www.gnu.org/licenses/>.
 
 ©Copyright 2023-2024 Laurent Lyaudet
--------------------------------------------------------------------------
+----------------------------------------------------------------------
 In older versions of Django, a prefetch use the ordering defined
 on the class prefetched.
 class Meta:
@@ -49,7 +49,8 @@ from django.db.models.fields.related_descriptors import (
     ReverseOneToOneDescriptor,
 )
 
-# In old versions of Django, the method is called get_prefetch_queryset().
+# In old versions of Django,
+# the method is called get_prefetch_queryset().
 # It is deprecated in Django 5 and will be removed in Django 6.
 # Apply the patch that corresponds to your version.
 # pylint: disable-next=invalid-name
