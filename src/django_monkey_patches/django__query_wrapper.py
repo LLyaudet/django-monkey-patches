@@ -236,6 +236,24 @@ def get_sql_signature_v1(extra_data_dict, data):
 get_sql_signature_v1.field_name = "sql_signature_v1"
 
 
+# pylint: disable-next=unused-argument
+def get_light_call_stack_v1(extra_data_dict, data):
+    """
+    An helper function to remove framework code from the call stack.
+    Usually, you want to know where you generate a DB request
+    in your own code.
+    """
+
+    return [
+        line
+        for line in data["call_stack"]
+        if not "site-packages/" in line
+    ]
+
+
+get_light_call_stack_v1.field_name = "light_call_stack_v1"
+
+
 # pylint: disable-next=too-many-arguments
 def get_extra_data_template_for_set_of_queries_v1(
     query_fields=None,
@@ -661,12 +679,13 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
 #                             "sql",
 #                             "params",
 #                             "many",
-#                             "call_stack",
+#                             # "call_stack",
+#                             get_light_call_stack_v1,
 #                             "start_time",
 #                             "result",
 #                             "end_time",
 #                             "duration",
-#                             get_full_query_v1
+#                             get_full_query_v1,
 #                         ],
 #                     )
 #                 )
