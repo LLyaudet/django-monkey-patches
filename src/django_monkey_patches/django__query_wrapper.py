@@ -37,7 +37,7 @@ import traceback
 from django.db import connections
 
 # Remind that you can modify the constants below during execution:
-# import django__query_wrapper
+# from django_monkey_patches import django__query_wrapper
 # django__query_wrapper.COUNT_QUERIES = True
 # ... the code I'm looking at closely
 # django__query_wrapper.COUNT_QUERIES = False
@@ -114,6 +114,7 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
             # if you activate COUNT_QUERIES.
             init_connections_extra_data_v1()
 
+            # See at end of file to wrap all connections.
             with connection.execute_wrapper(custom_query_wrapper_v1):
                 return self.get_response(request)
 
@@ -135,6 +136,7 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
             #   output = self.handle(*args, **options)
             # with:
             with connection.execute_wrapper(custom_query_wrapper_v1):
+                # See at end of file to wrap all connections.
                 output = self.handle(*args, **options)
         ...
     And then, make all your commands inherit from CustomBaseCommand.
@@ -632,13 +634,36 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
     )
 
 
+def wrap_connections(
+    exit_stack,
+    custom_query_wrapper,
+    connections_to_wrap=None,
+):
+    """
+    Apply the context-manager connection.execute_wrapper()
+    with the given custom_query_wrapper
+    on an ExitStack() instance,
+    for given connections or all connections if none is given.
+    """
+
+    if connections_to_wrap is None:
+        connections_to_wrap = connections
+    for connection_key in connections:
+        connection = connections[connection_key]
+        exit_stack.enter_context(
+            connection.execute_wrapper(custom_query_wrapper)
+        )
+
+
 # You should extract the data to logs or files,
 # during execution or at the end,
 # using custom insertion_callback or post_processing_callback.
 # Here is an example of intermediate complexity
 # using all of the above.
 #
-# import django_monkey_patches.django__query_wrapper
+# from contextlib import ExitStack
+#
+# from django_monkey_patches import django__query_wrapper
 # from django_monkey_patches.django__query_wrapper import (
 #     apply_reorder_dict_by_total_duration_of_sub_dicts_to,
 #     custom_query_wrapper_v1,
@@ -710,7 +735,8 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
 #               )
 #             )
 #         )
-#         with connection.execute_wrapper(custom_query_wrapper_v1):
+#         with ExitStack() as exit_stack:
+#             wrap_connections(exit_stack, custom_query_wrapper_v1)
 #             response = self.get_response(request)
 #             synthetize_connections_extra_data_v1()
 #             # dump to file or log:
