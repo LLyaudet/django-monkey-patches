@@ -417,11 +417,13 @@ def init_connections_extra_data_v1():
     connections.django_monkey_patches_dict = (
         get_extra_data_template_for_set_of_queries_v1()
     )
+    connections.django_monkey_patches_stash_stack = []
     for connection_key in connections:
         connection = connections[connection_key]
         connection.django_monkey_patches_dict = (
             get_extra_data_template_for_set_of_queries_v1()
         )
+        connection.django_monkey_patches_stash_stack = []
 
 
 # pylint: disable-next=too-many-arguments
@@ -648,10 +650,44 @@ def wrap_connections(
 
     if connections_to_wrap is None:
         connections_to_wrap = connections
-    for connection_key in connections:
+    for connection_key in connections_to_wrap:
         connection = connections[connection_key]
         exit_stack.enter_context(
             connection.execute_wrapper(custom_query_wrapper)
+        )
+
+
+def stash_extra_data_dicts():
+    """
+    Stash current django_monkey_patches_dicts
+    in django_monkey_patches_stash_stacks.
+    """
+
+    connections.django_monkey_patches_stash_stack.append(
+        connections.django_monkey_patches_dict
+    )
+    connections.django_monkey_patches_dict = None
+    for connection_key in connections:
+        connection = connections[connection_key]
+        connection.django_monkey_patches_stash_stack.append(
+            connection.django_monkey_patches_dict
+        )
+        connection.django_monkey_patches_dict = None
+
+
+def pop_extra_data_dicts():
+    """
+    Pop last dicts in django_monkey_patches_stash_stacks
+    to django_monkey_patches_dicts.
+    """
+
+    connections.django_monkey_patches_dict = (
+        connections.django_monkey_patches_stash_stack.pop()
+    )
+    for connection_key in connections:
+        connection = connections[connection_key]
+        connection.django_monkey_patches_dict = (
+            connection.django_monkey_patches_stash_stack.pop()
         )
 
 
