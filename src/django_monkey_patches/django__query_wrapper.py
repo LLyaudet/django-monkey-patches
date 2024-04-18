@@ -256,6 +256,82 @@ def get_light_call_stack_v1(extra_data_dict, data):
 get_light_call_stack_v1.field_name = "light_call_stack_v1"
 
 
+def get_managed_list(manager):
+    """
+    Smaller with auto-completion:
+    get_managed_list(manager)
+    [] if manager is None else manager.list()
+    """
+    if manager is None:
+        return []
+    return manager.list()
+
+
+def get_managed_dict(manager):
+    """
+    Smaller with auto-completion:
+    get_managed_dict(manager)
+    [] if manager is None else manager.dict()
+    """
+    if manager is None:
+        return []
+    return manager.dict()
+
+
+# Unfortunately, there is no "inline" function or macro in Python.
+# Another strange fact, C has inline functions,
+# but no keyword to inline only at some spot.
+# And sometimes, you know where is the spot
+# where it MUST-epsilon be inlined.
+# In theory, the compiler is supposed to know better than you...
+# Search for examples.
+# Of course, you can add assembly in C code instead.
+# Much more convenient.
+# Or you can use ORDER or CHAOS C "macros engines",
+# and recently Zig, but I would prefer more keywords
+# and less limited base macro rules for C,
+# instead of learning something totally new.
+# There may be more advantages to Zig that I don't see,
+# since I only read news about it.
+# And there is Rust with partial memory-safety.
+# But since I almost never do multi-threaded code,
+# I'm more looking at C and languages enabling very fast code,
+# than more safe code.
+# https://github.com/google/comprehensive-rust/issues
+# Something disappeared : I have no "issue",
+# but I still have some memory and a brain and a shiny armor
+# and a sword in the hands of God:
+# Let's hope it is just my tongue
+# to tell the Truth in the name of Jesus.
+# Let's hope I shall use my tongue more frequently aligned/adjusted
+# with God's intention. I have no pretention of perfection.
+# fn main() {
+#   for x in 1..5 {
+#     println!("x: {x}");
+#   }
+#   let bla = [1, 2, 3, 4, 5];
+#   // La bonne excuse,
+#   // c'est l'indécidabilité du problème de l'arrêt
+#   // (cf. le film Didier, certains ne savent pas s'arrêter),
+#   // style Collatz conjecture,
+#   // c'est clair qu'on fait ce genre de blagues
+#   // dans le code tout le temps...
+#   // Non mais sérieux... 99 % du code,
+#   // il doit y avoir des règles simples
+#   // pour ne pas avoir à gérer de problème indécidable...
+#   // Enfin, ce n'est que mon avis.
+#   // Mais je ne bosse pas trop sur des compilateurs ;
+#   // peut-être que c'est un peu plus au niveau méta
+#   // qu'il y a des trucs "amusants" sur le plan scientifique,
+#   // et encore ce n'est pas une certitude.
+#
+#   for elem in 1..10 {
+#     let truc = bla[elem];
+#     println!("elem: {truc}");
+#   }
+# }
+
+
 # pylint: disable-next=too-many-arguments
 def get_extra_data_template_for_set_of_queries_v1(
     query_fields=None,
@@ -269,6 +345,8 @@ def get_extra_data_template_for_set_of_queries_v1(
     allocated_subsets_init_callback=None,
     top_down_post_processing_callback=None,
     bottom_up_post_processing_callback=None,
+    # You may need that with django-rq or other multiprocesses code:
+    manager=None,
 ):
     """
     Obtain a default extra_data_dict with most of
@@ -289,17 +367,18 @@ def get_extra_data_template_for_set_of_queries_v1(
     """
 
     if query_fields is None:
-        query_fields = []
+        query_fields = get_managed_list(manager)
     if subsets_extra_data is None:
-        subsets_extra_data = {}
+        subsets_extra_data = get_managed_dict(manager)
     if allocated_subsets_extra_data is None:
-        allocated_subsets_extra_data = {}
+        allocated_subsets_extra_data = get_managed_dict(manager)
     if allocated_subsets_key_callback is None:
-        allocated_subsets_key_callback = {}
+        allocated_subsets_key_callback = get_managed_dict(manager)
     if allocated_subsets_init_callback is None:
-        allocated_subsets_init_callback = {}
+        allocated_subsets_init_callback = get_managed_dict(manager)
 
-    return {
+    result = get_managed_dict(manager)
+    result_content = {
         "query_count": 0,
         "query_fields": query_fields,  # [
         #     "execute",
@@ -314,21 +393,21 @@ def get_extra_data_template_for_set_of_queries_v1(
         #     "duration",
         #     get_full_query_v1,  # This is a function
         # ],
-        "query_list": [
-            # {
-            #     "execute": None,
-            #     "sql": None,
-            #     "params": None,
-            #     "many": None,
-            #     "context": None,
-            #     "call_stack": None,
-            #     "start_time": None,
-            #     "result": None,
-            #     "end_time": None,
-            #     "duration": None,
-            #     "full_query_v1": None,
-            # },
-        ],
+        "query_list": get_managed_list(manager),  # [
+        # {
+        #     "execute": None,
+        #     "sql": None,
+        #     "params": None,
+        #     "many": None,
+        #     "context": None,
+        #     "call_stack": None,
+        #     "start_time": None,
+        #     "result": None,
+        #     "end_time": None,
+        #     "duration": None,
+        #     "full_query_v1": None,
+        # },
+        # ],
         "total_duration": 0,
         "average_duration": 0,
         "min_duration": float("inf"),
@@ -406,24 +485,32 @@ def get_extra_data_template_for_set_of_queries_v1(
         # the bottom-up post processing makes more sense.
         # (Think sorting sub-results, etc.)
     }
+    result.update(result_content)
+    return result
 
 
-def init_connections_extra_data_v1():
+def init_connections_extra_data_v1(manager=None):
     """
     You should call this function or a custom one
     before using the custom query wrapper.
     """
 
     connections.django_monkey_patches_dict = (
-        get_extra_data_template_for_set_of_queries_v1()
+        get_extra_data_template_for_set_of_queries_v1(manager=manager)
     )
-    connections.django_monkey_patches_stash_stack = []
+    connections.django_monkey_patches_stash_stack = get_managed_list(
+        manager
+    )
     for connection_key in connections:
         connection = connections[connection_key]
         connection.django_monkey_patches_dict = (
-            get_extra_data_template_for_set_of_queries_v1()
+            get_extra_data_template_for_set_of_queries_v1(
+                manager=manager
+            )
         )
-        connection.django_monkey_patches_stash_stack = []
+        connection.django_monkey_patches_stash_stack = (
+            get_managed_list(manager)
+        )
 
 
 # pylint: disable-next=too-many-arguments
