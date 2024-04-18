@@ -482,7 +482,7 @@ def get_extra_data_template_for_set_of_queries_v1(
         # to avoid multi-post-processings
         # on recursed dicts.
         # But clearly, in most cases,
-        # the bottom-up post processing makes more sense.
+        # the bottom-up post-processing makes more sense.
         # (Think sorting sub-results, etc.)
     }
     result.update(result_content)
