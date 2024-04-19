@@ -262,6 +262,7 @@ def get_managed_list(manager):
     get_managed_list(manager)
     [] if manager is None else manager.list()
     """
+
     if manager is None:
         return []
     return manager.list()
@@ -271,10 +272,11 @@ def get_managed_dict(manager):
     """
     Smaller with auto-completion:
     get_managed_dict(manager)
-    [] if manager is None else manager.dict()
+    {} if manager is None else manager.dict()
     """
+
     if manager is None:
-        return []
+        return {}
     return manager.dict()
 
 
