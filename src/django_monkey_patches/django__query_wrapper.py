@@ -491,28 +491,90 @@ def get_extra_data_template_for_set_of_queries_v1(
     return result
 
 
-def init_connections_extra_data_v1(manager=None):
+def init_connections_extra_data(
+    get_extra_data_template_callback,
+    manager=None,
+    empty_stash_stack=False,
+):
     """
     You should call this function or a custom one
     before using the custom query wrapper.
     """
 
     connections.django_monkey_patches_dict = (
-        get_extra_data_template_for_set_of_queries_v1(manager=manager)
+        get_extra_data_template_callback()
     )
-    connections.django_monkey_patches_stash_stack = get_managed_list(
-        manager
-    )
+    if empty_stash_stack or not hasattr(
+        connections, "django_monkey_patches_stash_stack"
+    ):
+        connections.django_monkey_patches_stash_stack = (
+            get_managed_list(manager)
+        )
+
     for connection_key in connections:
         connection = connections[connection_key]
         connection.django_monkey_patches_dict = (
-            get_extra_data_template_for_set_of_queries_v1(
-                manager=manager
+            get_extra_data_template_callback()
+        )
+        if empty_stash_stack or not hasattr(
+            connection, "django_monkey_patches_stash_stack"
+        ):
+            connection.django_monkey_patches_stash_stack = (
+                get_managed_list(manager)
             )
+
+
+# pylint: disable-next=too-many-arguments
+def init_connections_extra_data_v1(
+    manager=None,
+    empty_stash_stack=False,
+    query_fields=None,
+    min_seconds_threshold=0,
+    max_seconds_threshold=float("inf"),
+    filter_callback=None,
+    insertion_callback=None,
+    subsets_extra_data=None,
+    allocated_subsets_extra_data=None,
+    allocated_subsets_key_callback=None,
+    allocated_subsets_init_callback=None,
+    top_down_post_processing_callback=None,
+    bottom_up_post_processing_callback=None,
+):
+    """
+    A simple default function providing the
+    get_extra_data_template_callback argument
+    to init_connections_extra_data().
+    """
+
+    def lambda_get_extra_data_template_for_set_of_queries_v1():
+        return get_extra_data_template_for_set_of_queries_v1(
+            query_fields=query_fields,
+            min_seconds_threshold=min_seconds_threshold,
+            max_seconds_threshold=max_seconds_threshold,
+            filter_callback=filter_callback,
+            insertion_callback=insertion_callback,
+            subsets_extra_data=subsets_extra_data,
+            allocated_subsets_extra_data=allocated_subsets_extra_data,
+            allocated_subsets_key_callback=(
+                allocated_subsets_key_callback
+            ),
+            allocated_subsets_init_callback=(
+                allocated_subsets_init_callback
+            ),
+            top_down_post_processing_callback=(
+                top_down_post_processing_callback
+            ),
+            bottom_up_post_processing_callback=(
+                bottom_up_post_processing_callback
+            ),
+            manager=manager,
         )
-        connection.django_monkey_patches_stash_stack = (
-            get_managed_list(manager)
-        )
+
+    init_connections_extra_data(
+        lambda_get_extra_data_template_for_set_of_queries_v1,
+        manager=manager,
+        empty_stash_stack=empty_stash_stack,
+    )
 
 
 # pylint: disable-next=too-many-arguments
@@ -746,7 +808,7 @@ def wrap_connections(
         )
 
 
-def stash_extra_data_dicts():
+def stash_extra_data_dicts(reinit_after_stash=None):
     """
     Stash current django_monkey_patches_dicts
     in django_monkey_patches_stash_stacks.
@@ -755,13 +817,70 @@ def stash_extra_data_dicts():
     connections.django_monkey_patches_stash_stack.append(
         connections.django_monkey_patches_dict
     )
-    connections.django_monkey_patches_dict = None
+
+    if reinit_after_stash is None:
+        connections.django_monkey_patches_dict = None
     for connection_key in connections:
         connection = connections[connection_key]
         connection.django_monkey_patches_stash_stack.append(
             connection.django_monkey_patches_dict
         )
-        connection.django_monkey_patches_dict = None
+        if reinit_after_stash is None:
+            connection.django_monkey_patches_dict = None
+
+    if reinit_after_stash:
+        reinit_after_stash()
+
+
+# pylint: disable-next=too-many-arguments
+def stash_extra_data_dicts_and_reinit_v1(
+    manager=None,
+    query_fields=None,
+    min_seconds_threshold=0,
+    max_seconds_threshold=float("inf"),
+    filter_callback=None,
+    insertion_callback=None,
+    subsets_extra_data=None,
+    allocated_subsets_extra_data=None,
+    allocated_subsets_key_callback=None,
+    allocated_subsets_init_callback=None,
+    top_down_post_processing_callback=None,
+    bottom_up_post_processing_callback=None,
+):
+    """
+    Stash current django_monkey_patches_dicts
+    in django_monkey_patches_stash_stacks,
+    and apply a reinit using default init functions.
+    """
+
+    def lambda_init_connections_extra_data_v1():
+        init_connections_extra_data_v1(
+            manager=manager,
+            empty_stash_stack=False,
+            query_fields=query_fields,
+            min_seconds_threshold=min_seconds_threshold,
+            max_seconds_threshold=max_seconds_threshold,
+            filter_callback=filter_callback,
+            insertion_callback=insertion_callback,
+            subsets_extra_data=subsets_extra_data,
+            allocated_subsets_extra_data=allocated_subsets_extra_data,
+            allocated_subsets_key_callback=(
+                allocated_subsets_key_callback
+            ),
+            allocated_subsets_init_callback=(
+                allocated_subsets_init_callback
+            ),
+            top_down_post_processing_callback=(
+                top_down_post_processing_callback
+            ),
+            bottom_up_post_processing_callback=(
+                bottom_up_post_processing_callback
+            ),
+        )
+
+    stash_extra_data_dicts(
+        reinit_after_stash=lambda_init_connections_extra_data_v1
+    )
 
 
 def pop_extra_data_dicts():
