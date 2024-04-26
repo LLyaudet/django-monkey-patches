@@ -73,9 +73,11 @@ class OModelSerializer(...):
                 f"{prefix}s",
                 post_prefetch_callback=(
                   create_post_prefetch_callback_add_backward_multiple(
-                    retrieve_forward_cache_callback=lambda o: [o.s]
-                    if o.s_id
-                    else [],
+                    retrieve_forward_cache_callback=lambda o: (
+                        [o.s]
+                        if o.s_id
+                        else []
+                    ),
                     backward_cache_name="current_o_ancestors",
                   )
                 ),
@@ -84,10 +86,12 @@ class OModelSerializer(...):
                 f"{prefix}c2",
                 post_prefetch_callback=(
                   create_post_prefetch_callback_add_backward_multiple(
-                    retrieve_forward_cache_callback=lambda o:[o.c2]
-                    if o.c2_id
-                    else [],
-                    backward_cache_name="current_order_ancestors",
+                    retrieve_forward_cache_callback=lambda o: (
+                        [o.c2]
+                        if o.c2_id
+                        else []
+                    ),
+                    backward_cache_name="current_o_ancestors",
                   )
                 ),
             ),
@@ -99,18 +103,18 @@ class OModelSerializer(...):
                     else P.objects.all()
                 ),
                 to_attr="needed_ps",
-                filter_callback=(
-                  lambda p: hasattr(p, "_prefetched_objects_cache")
-                )
-                and p._prefetched_objects_cache.get(
-                    "current_order_ancestors"
-                )
-                and any(
-                    map(
-                        lambda o: o.c2_id is not None,
-                        p._prefetched_objects_cache.get(
-                            "current_o_ancestors"
-                        ).values(),
+                filter_callback=lambda p: (
+                    hasattr(p, "_prefetched_objects_cache")
+                    and p._prefetched_objects_cache.get(
+                        "current_o_ancestors"
+                    )
+                    and any(
+                        map(
+                            lambda o: o.c2_id is not None,
+                            p._prefetched_objects_cache.get(
+                                 "current_o_ancestors"
+                            ).values(),
+                        )
                     )
                 ),
                 post_prefetch_callback=ventilate_ps_by_c_id,
