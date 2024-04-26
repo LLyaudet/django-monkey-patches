@@ -410,12 +410,16 @@ def create_post_prefetch_callback_add_backward_multiple(
             backward_level -= 1
         prefetch_before = get_previous_prefetch_to(prefetch_to)
         for obj in done_queries[prefetch_before]:
+            if obj is None:
+                continue
             forward_objects = retrieve_forward_cache_callback(obj)
             if get_key_for_backward_object_callback is None:
                 key = obj.pk
             else:
                 key = get_key_for_backward_object_callback(obj)
             for obj2 in forward_objects:
+                if obj2 is None:
+                    continue
                 if not hasattr(obj2, "_prefetched_objects_cache"):
                     # pylint: disable-next=protected-access
                     obj2._prefetched_objects_cache = {}
