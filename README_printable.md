@@ -12,7 +12,6 @@
 ![GitHub-license-badge]
 ![PyPI-python-version-badge]
 ![GitHub-code-size-in-bytes-badge]
-[![GitHub-sponsors-badge]][GitHub-sponsors-page]
 
 | **A collection of monkey patches to improve Django framework** |
 
