@@ -124,7 +124,3 @@ django-monkey-patches
 [GitHub-code-size-in-bytes-badge]: https://img.shields.io/github/\
 languages/code-size/llyaudet/django-monkey-patches
 
-[GitHub-sponsors-badge]: https://img.shields.io/github/sponsors/\
-LLyaudet
-
-[GitHub-sponsors-page]: https://github.com/sponsors/LLyaudet
