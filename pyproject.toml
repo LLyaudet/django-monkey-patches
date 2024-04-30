@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "django-monkey-patches"
-version = "2.9.1"
+version = "3.0.0"
 description = """\
 Add monkey-patches to correct and enhance your favorite framework\
 """
