@@ -29,6 +29,9 @@ by enabling debug, etc. that will be localized to a problem to solve
 without making the whole application unusable/slow in production.
 """
 
+# pylint: disable=too-many-lines
+
+import os
 import re
 import time
 import traceback
@@ -92,6 +95,28 @@ POST_EXECUTION_CALLBACK = None
 # and submit an issue if needed.
 # Otherwise, there may be a "new v1" that will break your code.
 # The other backward compatible problems should normally be adressed.
+
+
+def get_reference_pid():
+    """
+    A central function needed because Django connections can be shared
+    between multiple processes.
+    """
+
+    return connections.django_monkey_patches_reference_pids.get(
+        os.getpid(), os.getpid()
+    )
+
+
+def get_connection_dict(connection):
+    """
+    Always use this method
+    if you don't want compatibility problems later.
+    """
+
+    return connection.django_monkey_patches_dict.get(
+        get_reference_pid()
+    )
 
 
 def custom_query_wrapper_v1(execute, sql, params, many, context):
@@ -176,9 +201,9 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
         duration = end_time - start_time
 
     if COUNT_QUERIES:
-        connections.django_monkey_patches_dict["query_count"] += 1
+        get_connection_dict(connections)["query_count"] += 1
         connection = context["connection"]
-        connection.django_monkey_patches_dict["query_count"] += 1
+        get_connection_dict(connection)["query_count"] += 1
 
     if POST_EXECUTION_CALLBACK is not None:
         result = POST_EXECUTION_CALLBACK(
@@ -491,6 +516,46 @@ def get_extra_data_template_for_set_of_queries_v1(
     return result
 
 
+def get_connection_stack(connection):
+    """
+    Always use this method
+    if you don't want compatibility problems later.
+    """
+
+    return connection.django_monkey_patches_stash_stack.get(
+        get_reference_pid()
+    )
+
+
+def is_globally_init():
+    """
+    Since Django connections are shared between processes
+    in many cases,
+    tell if these connections already have the dicts linked
+    to this patch.
+    """
+
+    return hasattr(connections, "django_monkey_patches_dict")
+
+
+def is_locally_init():
+    """
+    Since Django connections are shared between processes
+    in many cases,
+    tell if these connections already have the dicts linked
+    to this patch.
+    And test if these dicts have values for the current reference_pid.
+    """
+
+    return (
+        is_globally_init()
+        and connections.django_monkey_patches_dict.get(
+            get_reference_pid()
+        )
+        is not None
+    )
+
+
 def init_connections_extra_data(
     get_extra_data_template_callback,
     manager=None,
@@ -501,27 +566,36 @@ def init_connections_extra_data(
     before using the custom query wrapper.
     """
 
-    connections.django_monkey_patches_dict = (
+    if not is_globally_init():
+        connections.django_monkey_patches_reference_pids = {}
+        connections.django_monkey_patches_dict = {}
+        connections.django_monkey_patches_stash_stack = {}
+        for connection_key in connections:
+            connection = connections[connection_key]
+            connection.django_monkey_patches_reference_pids = {}
+            connection.django_monkey_patches_dict = {}
+            connection.django_monkey_patches_stash_stack = {}
+
+    connections.django_monkey_patches_dict[get_reference_pid()] = (
         get_extra_data_template_callback()
     )
-    if empty_stash_stack or not hasattr(
-        connections, "django_monkey_patches_stash_stack"
-    ):
-        connections.django_monkey_patches_stash_stack = (
-            get_managed_list(manager)
-        )
+    if empty_stash_stack or get_connection_stack(connections) is None:
+        connections.django_monkey_patches_stash_stack[
+            get_reference_pid()
+        ] = get_managed_list(manager)
 
     for connection_key in connections:
         connection = connections[connection_key]
-        connection.django_monkey_patches_dict = (
+        connection.django_monkey_patches_dict[get_reference_pid()] = (
             get_extra_data_template_callback()
         )
-        if empty_stash_stack or not hasattr(
-            connection, "django_monkey_patches_stash_stack"
+        if (
+            empty_stash_stack
+            or get_connection_stack(connection) is None
         ):
-            connection.django_monkey_patches_stash_stack = (
-                get_managed_list(manager)
-            )
+            connection.django_monkey_patches_stash_stack[
+                get_reference_pid()
+            ] = get_managed_list(manager)
 
 
 # pylint: disable-next=too-many-arguments
@@ -596,8 +670,10 @@ def insert_in_connections_extra_data_v1(
     """
 
     all_dicts = [
-        connections.django_monkey_patches_dict,
-        context["connection"].django_monkey_patches_dict,
+        connections.django_monkey_patches_dict[get_reference_pid()],
+        context["connection"].django_monkey_patches_dict[
+            get_reference_pid()
+        ],
     ]
     data = {
         "execute": execute,
@@ -712,9 +788,13 @@ def synthetize_connections_extra_data_v1():
     on all root extra data dicts.
     """
 
-    extra_data_dicts = [connections.django_monkey_patches_dict]
+    extra_data_dicts = [
+        connections.django_monkey_patches_dict[get_reference_pid()]
+    ]
     extra_data_dicts.extend(
-        connections[connection_key].django_monkey_patches_dict
+        connections[connection_key].django_monkey_patches_dict[
+            get_reference_pid()
+        ]
         for connection_key in connections
     )
     for extra_data_dict in extra_data_dicts:
@@ -814,19 +894,27 @@ def stash_extra_data_dicts(reinit_after_stash=None):
     in django_monkey_patches_stash_stacks.
     """
 
-    connections.django_monkey_patches_stash_stack.append(
-        connections.django_monkey_patches_dict
+    connections.django_monkey_patches_stash_stack[
+        get_reference_pid()
+    ].append(
+        connections.django_monkey_patches_dict[get_reference_pid()]
     )
 
     if reinit_after_stash is None:
-        connections.django_monkey_patches_dict = None
+        connections.django_monkey_patches_dict[
+            get_reference_pid()
+        ] = None
     for connection_key in connections:
         connection = connections[connection_key]
-        connection.django_monkey_patches_stash_stack.append(
-            connection.django_monkey_patches_dict
+        connection.django_monkey_patches_stash_stack[
+            get_reference_pid()
+        ].append(
+            connection.django_monkey_patches_dict[get_reference_pid()]
         )
         if reinit_after_stash is None:
-            connection.django_monkey_patches_dict = None
+            connection.django_monkey_patches_dict[
+                get_reference_pid()
+            ] = None
 
     if reinit_after_stash:
         reinit_after_stash()
@@ -889,14 +977,45 @@ def pop_extra_data_dicts():
     to django_monkey_patches_dicts.
     """
 
-    connections.django_monkey_patches_dict = (
-        connections.django_monkey_patches_stash_stack.pop()
+    connections.django_monkey_patches_dict[get_reference_pid()] = (
+        connections.django_monkey_patches_stash_stack[
+            get_reference_pid()
+        ].pop()
     )
     for connection_key in connections:
         connection = connections[connection_key]
-        connection.django_monkey_patches_dict = (
-            connection.django_monkey_patches_stash_stack.pop()
+        connection.django_monkey_patches_dict[get_reference_pid()] = (
+            connection.django_monkey_patches_stash_stack[
+                get_reference_pid()
+            ].pop()
         )
+
+
+def patch_rq_v1():
+    """
+    A function to apply a patch to rq needed to follow pids between
+    parent and child processes in Django-rq.
+    """
+
+    # pylint: disable-next=import-error,import-outside-toplevel
+    from rq.worker import Worker
+
+    original_fork_work_horse = Worker.fork_work_horse
+    original_main_work_horse = Worker.main_work_horse
+
+    def fork_work_horse(self, job, queue):
+        job.reference_pid = os.getpid()
+        return original_fork_work_horse(self, job, queue)
+
+    def main_work_horse(self, job, queue):
+        connections.django_monkey_patches_reference_pids[
+            os.getpid()
+        ] = job.reference_pid
+        return original_main_work_horse(self, job, queue)
+
+    Worker.fork_work_horse = fork_work_horse
+    Worker.main_work_horse = main_work_horse
+    return (original_fork_work_horse, original_main_work_horse)
 
 
 # You should extract the data to logs or files,
@@ -940,13 +1059,13 @@ def pop_extra_data_dicts():
 #
 #     def __call__(self, request):
 #         init_connections_extra_data_v1()
-#         connection.django_monkey_patches_dict[
+#         connection.django_monkey_patches_dict[get_reference_pid()][
 #             "allocated_subsets_extra_data"
 #         ] = {"per_sql_signature_v1": {},}
-#         connection.django_monkey_patches_dict[
+#         connection.django_monkey_patches_dict[get_reference_pid()][
 #             "allocated_subsets_key_callback"
 #         ] = {"per_sql_signature_v1": get_sql_signature_v1,}
-#         connection.django_monkey_patches_dict[
+#         connection.django_monkey_patches_dict[get_reference_pid()][
 #             "allocated_subsets_init_callback"
 #         ] = {
 #             "per_sql_signature_v1": (
@@ -969,7 +1088,7 @@ def pop_extra_data_dicts():
 #             ),
 #         }
 #
-#         connection.django_monkey_patches_dict[
+#         connection.django_monkey_patches_dict[get_reference_pid()][
 #             "bottom_up_post_processing_callback"
 #         ] = (
 #             lambda x: (
@@ -984,9 +1103,13 @@ def pop_extra_data_dicts():
 #             response = self.get_response(request)
 #             synthetize_connections_extra_data_v1()
 #             # dump to file or log:
-#             # connections.django_monkey_patches_dict
+#             # connections.django_monkey_patches_dict[
+#             #     get_reference_pid()
+#             # ]
 #             # for connection_key in connections:
 #             #     some_connection = connections[connection_key]
 #             #     # dump to file or log:
-#             #     # some_connection.django_monkey_patches_dict
+#             #     # some_connection.django_monkey_patches_dict[
+#             #     #     get_reference_pid()
+#             #     # ]
 #             return response
