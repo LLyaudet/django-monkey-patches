@@ -28,9 +28,9 @@ personal_github="https://raw.githubusercontent.com/LLyaudet/"
 
 echo "Building README.md"
 script="$personal_github""DevOrSysAdminScripts/main/build_readme.sh"
-correct_sha512="058b06a2b072107860982054201f925035810fd9a7331a5b58573"
-correct_sha512+="5fdcd41b4ec63b85c17a6ecbb55d353c628655e51360a462f4b4"
-correct_sha512+="460dbcc6c2ec6292157bf04"
+correct_sha512="dcac1ebeaa636027f30ccb5893bcdcea1480105a88ebed0e6cf8d"
+correct_sha512+="2fb65cbbb183236d4ac3955eafebde197872245676441247e5cb"
+correct_sha512+="4d456e62ee84d6fa70eb80f"
 wget_sha512 ./build_readme.sh "$script" "$correct_sha512"
 chmod +x ./build_readme.sh
 ./build_readme.sh
@@ -59,9 +59,9 @@ too_long_code_lines
 echo "Analyzing shell scripts beginning"
 script="$personal_github"
 script+="DevOrSysAdminScripts/main/check_shell_scripts_beginning.sh"
-correct_sha512="2e10723297f7c6d7a870ac8808114aa6774a289d8c0dcbaf68cc0"
-correct_sha512+="41dd375bfcd17b1e4109bae30780932cb29aa6eaa0791a7efac0"
-correct_sha512+="074d39b262ff94f66c615ef"
+correct_sha512="ea0876c47a328eca96fae36f9b25a5cab01987178f23c3f71f4e8"
+correct_sha512+="b6dcf8dd24e47727265b102c3138a38d1f3bb9c116675a437190"
+correct_sha512+="8b1bc7ae24b79e9bd5a8715"
 wget_sha512 ./check_shell_scripts_beginning.sh "$script"\
   "$correct_sha512"
 source ./check_shell_scripts_beginning.sh
