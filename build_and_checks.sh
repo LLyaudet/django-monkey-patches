@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # This file is part of django-monkey-patches library.
 #
 # django-monkey-patches is free software:
@@ -25,9 +25,9 @@
 echo "Building README.md"
 personal="https://raw.githubusercontent.com/LLyaudet/"
 script="DevOrSysAdminScripts/main/build_readme.sh"
-correct_sha512="1081750df32198ae3835fbbe3d2d55c9b7096c2d571fadbff433e"
-correct_sha512+="51dad58d1b66b66c1378543e1ef20b78597b4b11a4b97b723911"
-correct_sha512+="ef7045870d53a68ceedd4e1"
+correct_sha512="058b06a2b072107860982054201f925035810fd9a7331a5b58573"
+correct_sha512+="5fdcd41b4ec63b85c17a6ecbb55d353c628655e51360a462f4b4"
+correct_sha512+="460dbcc6c2ec6292157bf04"
 if [[ ! -f "./build_readme.sh" ]];
 then
   wget "$personal""$script"
@@ -57,9 +57,9 @@ shopt -s globstar
 echo "Analyzing too long lines"
 personal="https://raw.githubusercontent.com/LLyaudet/"
 script="DevOrSysAdminScripts/main/too_long_code_lines.sh"
-correct_sha512="4f3cd19bd91bb2b258a7d705c468b69a3db7d75187c29756f7968"
-correct_sha512+="1cc7fb69e0a55439d8cd4a5c05b769960a66f03f150044b2dc4a"
-correct_sha512+="8d21b65f4f4ed84b5276c58"
+correct_sha512="c2519bc1f63b7b13a7c8083e38f1fa245e485a169846386c50f6b"
+correct_sha512+="639fa9d205dff35a4aa2125cb662434329011aaa714b6e1b2836"
+correct_sha512+="69f42048eeddb8269f23259"
 if [[ ! -f "./too_long_code_lines.sh" ]];
 then
   wget "$personal""$script"
