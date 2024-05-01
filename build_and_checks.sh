@@ -28,9 +28,9 @@ personal_github="https://raw.githubusercontent.com/LLyaudet/"
 
 echo "Building README.md"
 script="$personal_github""DevOrSysAdminScripts/main/build_readme.sh"
-correct_sha512="dcac1ebeaa636027f30ccb5893bcdcea1480105a88ebed0e6cf8d"
-correct_sha512+="2fb65cbbb183236d4ac3955eafebde197872245676441247e5cb"
-correct_sha512+="4d456e62ee84d6fa70eb80f"
+correct_sha512="a7705592c14c7709f8762967f5c5d1c98d27b8ab97fe2aaa73302"
+correct_sha512+="5bf641eb48c6a0e6a38c44bcbe155777290f9b837f0d059dcedb"
+correct_sha512+="68b64d27677b3cdb663624c"
 wget_sha512 ./build_readme.sh "$script" "$correct_sha512"
 chmod +x ./build_readme.sh
 ./build_readme.sh
