@@ -22,25 +22,17 @@
 #
 # ©Copyright 2023-2024 Laurent Lyaudet
 
+source ./wget_sha512.sh
+
+personal_github="https://raw.githubusercontent.com/LLyaudet/"
+
 echo "Building README.md"
-personal="https://raw.githubusercontent.com/LLyaudet/"
-script="DevOrSysAdminScripts/main/build_readme.sh"
+script="$personal_github""DevOrSysAdminScripts/main/build_readme.sh"
 correct_sha512="058b06a2b072107860982054201f925035810fd9a7331a5b58573"
 correct_sha512+="5fdcd41b4ec63b85c17a6ecbb55d353c628655e51360a462f4b4"
 correct_sha512+="460dbcc6c2ec6292157bf04"
-if [[ ! -f "./build_readme.sh" ]];
-then
-  wget "$personal""$script"
-fi
+wget_sha512 ./build_readme.sh "$script" "$correct_sha512"
 chmod +x ./build_readme.sh
-present_sha512=`sha512sum ./build_readme.sh | cut -f1 -d' '`
-if [[ "$present_sha512" != "$correct_sha512" ]];
-then
-  echo "build_readme.sh does not have correct sha512"
-  echo "wanted $correct_sha512"
-  echo "found $present_sha512"
-  exit
-fi
 ./build_readme.sh
 
 echo "Running isort"
@@ -55,23 +47,22 @@ pylint src/django_monkey_patches/
 shopt -s globstar
 
 echo "Analyzing too long lines"
-personal="https://raw.githubusercontent.com/LLyaudet/"
-script="DevOrSysAdminScripts/main/too_long_code_lines.sh"
-correct_sha512="c2519bc1f63b7b13a7c8083e38f1fa245e485a169846386c50f6b"
-correct_sha512+="639fa9d205dff35a4aa2125cb662434329011aaa714b6e1b2836"
-correct_sha512+="69f42048eeddb8269f23259"
-if [[ ! -f "./too_long_code_lines.sh" ]];
-then
-  wget "$personal""$script"
-fi
-chmod +x ./too_long_code_lines.sh
-present_sha512=`sha512sum ./too_long_code_lines.sh | cut -f1 -d' '`
-if [[ "$present_sha512" != "$correct_sha512" ]];
-then
-  echo "too_long_code_lines.sh does not have correct sha512"
-  echo "wanted $correct_sha512"
-  echo "found $present_sha512"
-  exit
-fi
+script="$personal_github"
+script+="DevOrSysAdminScripts/main/too_long_code_lines.sh"
+correct_sha512="eab26337506d6fabdea227c4b584391cc4a728e6b852be2232a7e"
+correct_sha512+="4d21261eb356df77257b0ea7152c9587ce89a963732fc644caf1"
+correct_sha512+="38c21ee51932e6fa6168bf9"
+wget_sha512 ./too_long_code_lines.sh "$script" "$correct_sha512"
 source ./too_long_code_lines.sh
 too_long_code_lines
+
+echo "Analyzing shell scripts beginning"
+script="$personal_github"
+script+="DevOrSysAdminScripts/main/check_shell_scripts_beginning.sh"
+correct_sha512="2e10723297f7c6d7a870ac8808114aa6774a289d8c0dcbaf68cc0"
+correct_sha512+="41dd375bfcd17b1e4109bae30780932cb29aa6eaa0791a7efac0"
+correct_sha512+="074d39b262ff94f66c615ef"
+wget_sha512 ./check_shell_scripts_beginning.sh "$script"\
+  "$correct_sha512"
+source ./check_shell_scripts_beginning.sh
+check_shell_scripts_beginning
