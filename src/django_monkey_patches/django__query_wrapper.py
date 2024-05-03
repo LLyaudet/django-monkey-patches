@@ -950,9 +950,9 @@ def stash_extra_data_dict(
     )
 
     if reinit_after_stash is None:
-        connection.django_monkey_patches_dict[
-            get_reference_pid()
-        ] = None
+        connection.django_monkey_patches_dict[get_reference_pid()] = (
+            None
+        )
     else:
         reinit_after_stash(connection)
 
