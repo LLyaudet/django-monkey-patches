@@ -29,7 +29,7 @@ As of now, it is only for tests.
 import os
 
 
-def make_test_cache_key(key, key_prefix, version):
+def get_test_cache_key(key, key_prefix, version):
     """
     Add a simple "test_cache" prefix.
 
@@ -42,7 +42,10 @@ def make_test_cache_key(key, key_prefix, version):
     return f"test_cache:{key_prefix}:{version}:{key}"
 
 
-def make_parallel_test_cache_key(key, key_prefix, version):
+make_test_cache_key = get_test_cache_key
+
+
+def get_parallel_test_cache_key(key, key_prefix, version):
     """
     Add a simple "test_cache" prefix plus the current pid.
     The local memory cache is isolated between processes.
@@ -60,5 +63,7 @@ def make_parallel_test_cache_key(key, key_prefix, version):
         for cache in CACHES.values():
             cache["KEY_FUNCTION"] = make_parallel_test_cache_key
     """
-
     return f"test_cache{os.getpid()}:{key_prefix}:{version}:{key}"
+
+
+make_parallel_test_cache_key = get_parallel_test_cache_key

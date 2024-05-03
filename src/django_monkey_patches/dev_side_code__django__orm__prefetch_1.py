@@ -779,7 +779,6 @@ def cc_field_list_list_nnl(f):
         """
         The customized c_field_list_list_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, f) else []
 
     return c_field_list_list_nnl
@@ -795,7 +794,6 @@ def cc_field_id_list_list_nnl(f):
         """
         The customized c_field_id_list_list_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, g) else []
 
     return c_field_id_list_list_nnl
@@ -810,7 +808,6 @@ def cc_field_not_none_list_list_nnl(f):
         """
         The customized c_field_not_none_list_list_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, f) is not None else []
 
     return c_field_not_none_list_list_nnl
@@ -826,7 +823,6 @@ def cc_field_id_not_none_list_list_nnl(f):
         """
         The customized c_field_id_not_none_list_list_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, g) is not None else []
 
     return c_field_id_not_none_list_list_nnl
@@ -841,7 +837,6 @@ def cc_field_none_list_list_nnl(f):
         """
         The customized c_field_none_list_list_nnl.
         """
-
         return [] if getattr(x, f) is None else [getattr(x, f)]
 
     return c_field_none_list_list_nnl
@@ -857,7 +852,6 @@ def cc_field_id_none_list_list_nnl(f):
         """
         The customized c_field_id_none_list_list_nnl.
         """
-
         return [] if getattr(x, g) is None else [getattr(x, f)]
 
     return c_field_id_none_list_list_nnl
@@ -872,7 +866,6 @@ def cc_field_tuple_tuple_nnl(f):
         """
         The customized c_field_tuple_tuple_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, f) else ()
 
     return c_field_tuple_tuple_nnl
@@ -888,7 +881,6 @@ def cc_field_id_tuple_tuple_nnl(f):
         """
         The customized c_field_id_tuple_tuple_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, g) else ()
 
     return c_field_id_tuple_tuple_nnl
@@ -903,7 +895,6 @@ def cc_field_not_none_tuple_tuple_nnl(f):
         """
         The customized c_field_not_none_tuple_tuple_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, f) is not None else ()
 
     return c_field_not_none_tuple_tuple_nnl
@@ -919,7 +910,6 @@ def cc_field_id_not_none_tuple_tuple_nnl(f):
         """
         The customized c_field_id_not_none_tuple_tuple_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, g) is not None else ()
 
     return c_field_id_not_none_tuple_tuple_nnl
@@ -934,7 +924,6 @@ def cc_field_none_tuple_tuple_nnl(f):
         """
         The customized c_field_none_tuple_tuple_nnl.
         """
-
         return () if getattr(x, f) is None else (getattr(x, f),)
 
     return c_field_none_tuple_tuple_nnl
@@ -950,7 +939,6 @@ def cc_field_id_none_tuple_tuple_nnl(f):
         """
         The customized c_field_id_none_tuple_tuple_nnl.
         """
-
         return () if getattr(x, g) is None else (getattr(x, f),)
 
     return c_field_id_none_tuple_tuple_nnl
@@ -965,7 +953,6 @@ def cc_field_list_tuple_nnl(f):
         """
         The customized c_field_list_tuple_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, f) else ()
 
     return c_field_list_tuple_nnl
@@ -981,7 +968,6 @@ def cc_field_id_list_tuple_nnl(f):
         """
         The customized c_field_id_list_tuple_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, g) else ()
 
     return c_field_id_list_tuple_nnl
@@ -996,7 +982,6 @@ def cc_field_not_none_list_tuple_nnl(f):
         """
         The customized c_field_not_none_list_tuple_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, f) is not None else ()
 
     return c_field_not_none_list_tuple_nnl
@@ -1012,7 +997,6 @@ def cc_field_id_not_none_list_tuple_nnl(f):
         """
         The customized c_field_id_not_none_list_tuple_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, g) is not None else ()
 
     return c_field_id_not_none_list_tuple_nnl
@@ -1027,7 +1011,6 @@ def cc_field_none_list_tuple_nnl(f):
         """
         The customized c_field_none_list_tuple_nnl.
         """
-
         return () if getattr(x, f) is None else [getattr(x, f)]
 
     return c_field_none_list_tuple_nnl
@@ -1043,7 +1026,6 @@ def cc_field_id_none_list_tuple_nnl(f):
         """
         The customized c_field_id_none_list_tuple_nnl.
         """
-
         return () if getattr(x, g) is None else [getattr(x, f)]
 
     return c_field_id_none_list_tuple_nnl
@@ -1058,7 +1040,6 @@ def cc_field_tuple_list_nnl(f):
         """
         The customized c_field_tuple_list_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, f) else []
 
     return c_field_tuple_list_nnl
@@ -1074,7 +1055,6 @@ def cc_field_id_tuple_list_nnl(f):
         """
         The customized c_field_id_tuple_list_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, g) else []
 
     return c_field_id_tuple_list_nnl
@@ -1089,7 +1069,6 @@ def cc_field_not_none_tuple_list_nnl(f):
         """
         The customized c_field_not_none_tuple_list_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, f) is not None else []
 
     return c_field_not_none_tuple_list_nnl
@@ -1105,7 +1084,6 @@ def cc_field_id_not_none_tuple_list_nnl(f):
         """
         The customized c_field_id_not_none_tuple_list_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, g) is not None else []
 
     return c_field_id_not_none_tuple_list_nnl
@@ -1120,7 +1098,6 @@ def cc_field_none_tuple_list_nnl(f):
         """
         The customized c_field_none_tuple_list_nnl.
         """
-
         return [] if getattr(x, f) is None else (getattr(x, f),)
 
     return c_field_none_tuple_list_nnl
@@ -1136,7 +1113,6 @@ def cc_field_id_none_tuple_list_nnl(f):
         """
         The customized c_field_id_none_tuple_list_nnl.
         """
-
         return [] if getattr(x, g) is None else (getattr(x, f),)
 
     return c_field_id_none_tuple_list_nnl
@@ -1151,7 +1127,6 @@ def cc_field_tuple_empty_nnl(f):
         """
         The customized c_field_tuple_empty_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, f) else e
 
     return c_field_tuple_empty_nnl
@@ -1167,7 +1142,6 @@ def cc_field_id_tuple_empty_nnl(f):
         """
         The customized c_field_id_tuple_empty_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, g) else e
 
     return c_field_id_tuple_empty_nnl
@@ -1182,7 +1156,6 @@ def cc_field_not_none_tuple_empty_nnl(f):
         """
         The customized c_field_not_none_tuple_empty_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, f) is not None else e
 
     return c_field_not_none_tuple_empty_nnl
@@ -1198,7 +1171,6 @@ def cc_field_id_not_none_tuple_empty_nnl(f):
         """
         The customized c_field_id_not_none_tuple_empty_nnl.
         """
-
         return (getattr(x, f),) if getattr(x, g) is not None else e
 
     return c_field_id_not_none_tuple_empty_nnl
@@ -1213,7 +1185,6 @@ def cc_field_none_tuple_empty_nnl(f):
         """
         The customized c_field_none_tuple_empty_nnl.
         """
-
         return e if getattr(x, f) is None else (getattr(x, f),)
 
     return c_field_none_tuple_empty_nnl
@@ -1229,7 +1200,6 @@ def cc_field_id_none_tuple_empty_nnl(f):
         """
         The customized c_field_id_none_tuple_empty_nnl.
         """
-
         return e if getattr(x, g) is None else (getattr(x, f),)
 
     return c_field_id_none_tuple_empty_nnl
@@ -1244,7 +1214,6 @@ def cc_field_list_empty_nnl(f):
         """
         The customized c_field_list_empty_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, f) else e
 
     return c_field_list_empty_nnl
@@ -1260,7 +1229,6 @@ def cc_field_id_list_empty_nnl(f):
         """
         The customized c_field_id_list_empty_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, g) else e
 
     return c_field_id_list_empty_nnl
@@ -1275,7 +1243,6 @@ def cc_field_not_none_list_empty_nnl(f):
         """
         The customized c_field_not_none_list_empty_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, f) is not None else e
 
     return c_field_not_none_list_empty_nnl
@@ -1291,7 +1258,6 @@ def cc_field_id_not_none_list_empty_nnl(f):
         """
         The customized c_field_id_not_none_list_empty_nnl.
         """
-
         return [getattr(x, f)] if getattr(x, g) is not None else e
 
     return c_field_id_not_none_list_empty_nnl
@@ -1306,7 +1272,6 @@ def cc_field_none_list_empty_nnl(f):
         """
         The customized c_field_none_list_empty_nnl.
         """
-
         return e if getattr(x, f) is None else [getattr(x, f)]
 
     return c_field_none_list_empty_nnl
@@ -1322,7 +1287,6 @@ def cc_field_id_none_list_empty_nnl(f):
         """
         The customized c_field_id_none_list_empty_nnl.
         """
-
         return e if getattr(x, g) is None else [getattr(x, f)]
 
     return c_field_id_none_list_empty_nnl
@@ -1534,7 +1498,6 @@ def benchmark(callbacks_to_benchmark):
     """
     Benchmark all the callbacks in the argument dict.
     """
-
     result = []
     for name, callback in callbacks_to_benchmark.items():
         time_with_fk = timeit.timeit(

@@ -102,7 +102,6 @@ def get_reference_pid():
     A central function needed because Django connections can be shared
     between multiple processes.
     """
-
     return connections.django_monkey_patches_reference_pids.get(
         os.getpid(), os.getpid()
     )
@@ -113,7 +112,6 @@ def get_connection_dict(connection):
     Always use this method
     if you don't want compatibility problems later.
     """
-
     return connection.django_monkey_patches_dict.get(
         get_reference_pid()
     )
@@ -168,7 +166,6 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
     You can go way further
     in this line of customization and monitoring.
     """
-
     if THROTTLE_QUERIES:
         time.sleep(QUERY_PENALTY_MILLISECONDS / 1000)
 
@@ -228,7 +225,6 @@ def get_full_query_v1(extra_data_dict, data):
     An helper function to see the request
     as it will be transmitted to the DBMS.
     """
-
     connection = data["context"]["connection"]
     return connection.cursor().mogrify(data["sql"], data["params"])
 
@@ -256,7 +252,6 @@ def get_sql_signature_v1(extra_data_dict, data):
     what we had at Teliae when I was working there.
     But the ideas here both stem from my work at Teliae and Deleev.
     """
-
     return params_placeholders_regexp.sub("", data["sql"])
 
 
@@ -270,7 +265,6 @@ def get_light_call_stack_v1(extra_data_dict, data):
     Usually, you want to know where you generate a DB request
     in your own code.
     """
-
     return [
         line
         for line in data["call_stack"]
@@ -287,7 +281,6 @@ def get_managed_list(manager):
     get_managed_list(manager)
     [] if manager is None else manager.list()
     """
-
     if manager is None:
         return []
     return manager.list()
@@ -299,7 +292,6 @@ def get_managed_dict(manager):
     get_managed_dict(manager)
     {} if manager is None else manager.dict()
     """
-
     if manager is None:
         return {}
     return manager.dict()
@@ -392,7 +384,6 @@ def get_extra_data_template_for_set_of_queries_v1(
     you have no obligation at all.
     But it would be nice to contribute anyway.
     """
-
     if query_fields is None:
         query_fields = get_managed_list(manager)
     if subsets_extra_data is None:
@@ -521,7 +512,6 @@ def get_connection_stack(connection):
     Always use this method
     if you don't want compatibility problems later.
     """
-
     return connection.django_monkey_patches_stash_stack.get(
         get_reference_pid()
     )
@@ -534,7 +524,6 @@ def is_globally_init():
     tell if these connections already have the dicts linked
     to this patch.
     """
-
     return hasattr(connections, "django_monkey_patches_dict")
 
 
@@ -546,7 +535,6 @@ def is_locally_init():
     to this patch.
     And test if these dicts have values for the current reference_pid.
     """
-
     return (
         is_globally_init()
         and connections.django_monkey_patches_dict.get(
@@ -565,7 +553,6 @@ def init_connections_extra_data(
     You should call this function or a custom one
     before using the custom query wrapper.
     """
-
     if not is_globally_init():
         connections.django_monkey_patches_reference_pids = {}
         connections.django_monkey_patches_dict = {}
@@ -668,7 +655,6 @@ def insert_in_connections_extra_data_v1(
     The entry-point function to insert query data in relevant dicts.
     It should be your default POST_EXECUTION_CALLBACK.
     """
-
     all_dicts = [
         connections.django_monkey_patches_dict[get_reference_pid()],
         context["connection"].django_monkey_patches_dict[
@@ -698,7 +684,6 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
     The recursive function used to insert the data of a query
     in all relevant dicts.
     """
-
     # Filtering part -------------------------------------------------
     if data["duration"] is not None:
         # /!\ check list: you did activate TIME_QUERIES?
@@ -787,7 +772,6 @@ def synthetize_connections_extra_data_v1():
     The entry-point function to call synthetize_extra_data_dict_v1()
     on all root extra data dicts.
     """
-
     extra_data_dicts = [
         connections.django_monkey_patches_dict[get_reference_pid()]
     ]
@@ -806,7 +790,6 @@ def synthetize_extra_data_dict_v1(extra_data_dict):
     The recursive function used to synthetize
     the results at the end.
     """
-
     if extra_data_dict["query_count"] > 0:
         extra_data_dict["average_duration"] = (
             extra_data_dict["total_duration"]
@@ -843,7 +826,6 @@ def reorder_dict_by_total_duration_of_sub_dicts(some_dict):
     is to see at the top
     similar queries where most of the time is spent.
     """
-
     couples_list = list(some_dict.items())
     couples_list.sort(
         key=lambda x: x[1]["total_duration"],
@@ -859,7 +841,6 @@ def apply_reorder_dict_by_total_duration_of_sub_dicts_to(
     """
     This function simplifies use of the previous one.
     """
-
     main_dict[some_sub_dict_key] = (
         reorder_dict_by_total_duration_of_sub_dicts(
             main_dict[some_sub_dict_key]
@@ -878,7 +859,6 @@ def wrap_connections(
     on an ExitStack() instance,
     for given connections or all connections if none is given.
     """
-
     if connections_to_wrap is None:
         connections_to_wrap = connections
     for connection_key in connections_to_wrap:
@@ -893,7 +873,6 @@ def stash_extra_data_dicts(reinit_after_stash=None):
     Stash current django_monkey_patches_dicts
     in django_monkey_patches_stash_stacks.
     """
-
     connections.django_monkey_patches_stash_stack[
         get_reference_pid()
     ].append(
@@ -976,7 +955,6 @@ def pop_extra_data_dicts():
     Pop last dicts in django_monkey_patches_stash_stacks
     to django_monkey_patches_dicts.
     """
-
     connections.django_monkey_patches_dict[get_reference_pid()] = (
         connections.django_monkey_patches_stash_stack[
             get_reference_pid()
@@ -991,32 +969,33 @@ def pop_extra_data_dicts():
         )
 
 
-def patch_rq_v1():
+def apply_patch_rq_v1():
     """
     A function to apply a patch to rq needed to follow pids between
     parent and child processes in Django-rq.
     """
-
     # pylint: disable-next=import-error,import-outside-toplevel
     from rq.worker import Worker
 
     original_fork_work_horse = Worker.fork_work_horse
     original_main_work_horse = Worker.main_work_horse
 
-    def fork_work_horse(self, job, queue):
+    def patched_fork_work_horse(self, job, queue):
         job.reference_pid = os.getpid()
         return original_fork_work_horse(self, job, queue)
 
-    def main_work_horse(self, job, queue):
+    def patched_main_work_horse(self, job, queue):
         connections.django_monkey_patches_reference_pids[
             os.getpid()
         ] = job.reference_pid
         return original_main_work_horse(self, job, queue)
 
-    Worker.fork_work_horse = fork_work_horse
-    Worker.main_work_horse = main_work_horse
+    Worker.fork_work_horse = patched_fork_work_horse
+    Worker.main_work_horse = patched_main_work_horse
     return (original_fork_work_horse, original_main_work_horse)
 
+
+patch_rq_v1 = apply_patch_rq_v1
 
 # You should extract the data to logs or files,
 # during execution or at the end,

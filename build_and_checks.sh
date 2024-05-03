@@ -22,6 +22,7 @@
 #
 # ©Copyright 2023-2024 Laurent Lyaudet
 
+shopt -s globstar
 source ./wget_sha512.sh
 
 personal_github="https://raw.githubusercontent.com/LLyaudet/"
@@ -41,10 +42,11 @@ isort .
 echo "Running black"
 black .
 
+echo "Checking empty lines after Python function docstrings"
+pcregrep -M $'def [^"]*"""([^"]|"(?!""))*"""\n\n(?!\s*def)' -- **/*.py
+
 echo "Running pylint"
 pylint src/django_monkey_patches/
-
-shopt -s globstar
 
 echo "Analyzing too long lines"
 script="$personal_github"

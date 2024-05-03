@@ -104,14 +104,16 @@ def get_one_request_POST_datum(self, key, default=None):
     return self.get_request_POST().get(key, default)
 
 
-def apply_get_request_patch_v1():
+def apply_patch_field_get_request_v1():
     """
     Add to Field (and Serializer) all the shortcuts.
     """
-
     Field.get_request_query_params = get_request_query_params
     Field.get_request_data = get_request_data
     Field.get_request_POST = get_request_POST
     Field.get_one_request_query_param = get_one_request_query_param
     Field.get_one_request_datum = get_one_request_datum
     Field.get_one_request_POST_datum = get_one_request_POST_datum
+
+
+apply_get_request_patch_v1 = apply_patch_field_get_request_v1

@@ -272,13 +272,15 @@ def patched_prefetch_one_level_v1(
     )
 
 
-def apply_patch_prefetch_with_filter_callback_v1():
+def apply_patch_prefetch_v1():
     """
     Applying the patch for prefetches on subsets of instances.
     """
     Prefetch.__init__ = patched_prefetch__init__v1
     query.prefetch_one_level = patched_prefetch_one_level_v1
 
+
+apply_patch_prefetch_with_filter_callback_v1 = apply_patch_prefetch_v1
 
 # Now things are starting to be amusing.
 # We load the source code of the function prefetch_related_objects()
@@ -338,7 +340,7 @@ exec(
 )
 
 
-def apply_patch_prefetch_with_v2():
+def apply_patch_prefetch_v2():
     """
     Applying the patch for prefetches with:
     - filter_callback,
@@ -349,6 +351,9 @@ def apply_patch_prefetch_with_v2():
     query.prefetch_related_objects = (
         patched_prefetch_related_objects_v1
     )
+
+
+apply_patch_prefetch_with_v2 = apply_patch_prefetch_v2
 
 
 def get_previous_prefetch_to(prefetch_to):
@@ -459,7 +464,6 @@ def create_retrieve_forward_cache_callback_for_foreign_key(
         The customized retrieve_forward_cache_callback function
         that will be returned.
         """
-
         return e if getattr(x, g) is None else (getattr(x, f),)
 
     return retrieve_forward_cache_callback_for_foreign_key
@@ -479,7 +483,6 @@ def create_retrieve_forward_cache_callback_for_prefetched_objects(
         The customized retrieve_forward_cache_callback function
         that will be returned.
         """
-
         if not hasattr(x, "_prefetched_objects_cache"):
             return e
 
