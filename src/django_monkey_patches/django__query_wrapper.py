@@ -97,14 +97,108 @@ POST_EXECUTION_CALLBACK = None
 # The other backward compatible problems should normally be adressed.
 
 
+# Structure names needed for this patch
+SN1 = "django_monkey_patches_reference_pids"
+SN2 = "django_monkey_patches_dicts"
+SN3 = "django_monkey_patches_stash_stacks"
+
+
+def short_structure_names():
+    """
+    If you want to test if it is faster with shorter names.
+    Moreover, you would enjoy inlining the 3 functions below
+    and getattr(), setattr().
+    It dates from Teliae,
+    I was doing a lot of optimizations everywhere,
+    and I don't remember if JP was joking
+    (I think he was, or at least he was smiling),
+    but he told me that I could also use short variables, etc.
+    since I was using very long variable and function names
+    (example: get_extra_data_template_for_set_of_queries_v1() XD
+    typical of my code :) )
+    and we were using an interpreted language.
+    We all know that hash functions are used to handle
+    all this stuff in interpreted languages.
+    Moreover, since if you give me a grain,
+    I tend to grow a full plant,
+    I tought about Fortran with variables limited to six characters
+    (at least in first versions),
+    and also that an IDE could use a correspondance table
+    (code would really be code with short undechiffrable tokens)
+    and display live the corresponding "full text tokens".
+    Probable downsides:
+    - handling multi-modules projects
+      with distinct correspondance tables,
+    - handling compatibility when serializing objects,
+    - brainfucked regexp when searching in (multi-modules)-projects,
+      frequently you're quite happy that comments, code,
+      or logs use the same language,
+    - no gain or limited gain for compiled languages,
+      (Does the Linux kernel compiles faster with this approach?
+      Probably not much than a few percents gain.),
+    - more energy consumption on the laptop of the dev.
+    There is another evident use case in my mind,
+    and it is another paradox, the serialization in SQL.
+    I'm not an expert of prepared statements,
+    and I don't know if some RDBMS use some "fast lanes" query ports
+    with more raw data approach than SQL for simple queries like:
+    SELECT * FROM my_table WHERE id = 111;
+    But I think a correspondance table with short names for table
+    names and column names would be easy to implement and share
+    between modules, talking with the same database.
+    ORMs like Django's could handle such things.
+    Internally, RDBMS use integer ids for tables and columns,
+    but it would be easy to have:
+    -- FAST1
+    SELECT a123.b234, a123.c456 FROM a123 WHERE a123.d567 = 'FAST';
+    Moreover, using fixed size symbols/tokens instead of variable
+    sizes could be more efficient:
+    - 2 digits in base 64~ = 4096
+      (most databases don't have this number of columns)
+    - 3 digits in base 64~ = 262144
+      (very few databases have more than this number of columns,
+      or tables)
+    - 4 digits in base 64~ = 16777216
+      (examples?)
+    These last remarks also apply to interpreted languages
+    or compiled languages,
+    moreover if applied to keywords of the language also,
+    it could yield some parrallel chunks processing of the source code
+    because of alignment, etc.
+    """
+    # pylint: disable-next=global-statement
+    global SN1
+    # pylint: disable-next=global-statement
+    global SN2
+    # pylint: disable-next=global-statement
+    global SN3
+    SN1 = "dmp_rp"
+    SN2 = "dmp_d"
+    SN3 = "dmp_ss"
+
+
+def _get_dmp_rp(connection):
+    """A function that would be interesting to inline."""
+    return getattr(connection, SN1)
+
+
+def _get_dmp_d(connection):
+    """A function that would be interesting to inline."""
+    return getattr(connection, SN2)
+
+
+def _get_dmp_ss(connection):
+    """A function that would be interesting to inline."""
+    return getattr(connection, SN3)
+
+
 def get_reference_pid():
     """
     A central function needed because Django connections can be shared
     between multiple processes.
     """
-    return connections.django_monkey_patches_reference_pids.get(
-        os.getpid(), os.getpid()
-    )
+    pid = os.getpid()
+    return _get_dmp_rp(connections).get(pid, pid)
 
 
 def get_connection_dict(connection):
@@ -112,9 +206,7 @@ def get_connection_dict(connection):
     Always use this method
     if you don't want compatibility problems later.
     """
-    return connection.django_monkey_patches_dict.get(
-        get_reference_pid()
-    )
+    return _get_dmp_d(connection).get(get_reference_pid())
 
 
 def custom_query_wrapper_v1(execute, sql, params, many, context):
@@ -198,9 +290,13 @@ def custom_query_wrapper_v1(execute, sql, params, many, context):
         duration = end_time - start_time
 
     if COUNT_QUERIES:
-        get_connection_dict(connections)["query_count"] += 1
+        # Micro-optimization on pid and less function calls
+        pid = get_reference_pid()
+        # get_connection_dict(connections)["query_count"] += 1
+        _get_dmp_d(connections)[pid]["query_count"] += 1
         connection = context["connection"]
-        get_connection_dict(connection)["query_count"] += 1
+        # get_connection_dict(connection)["query_count"] += 1
+        _get_dmp_d(connection)[pid]["query_count"] += 1
 
     if POST_EXECUTION_CALLBACK is not None:
         result = POST_EXECUTION_CALLBACK(
@@ -512,9 +608,7 @@ def get_connection_stack(connection):
     Always use this method
     if you don't want compatibility problems later.
     """
-    return connection.django_monkey_patches_stash_stack.get(
-        get_reference_pid()
-    )
+    return _get_dmp_ss(connection).get(get_reference_pid())
 
 
 def is_globally_init(connection):
@@ -524,7 +618,7 @@ def is_globally_init(connection):
     tell if these connections already have the dicts linked
     to this patch.
     """
-    return hasattr(connection, "django_monkey_patches_dict")
+    return hasattr(connection, SN2)
 
 
 def is_locally_init(connection):
@@ -537,9 +631,7 @@ def is_locally_init(connection):
     """
     return (
         is_globally_init(connection)
-        and connection.django_monkey_patches_dict.get(
-            get_reference_pid()
-        )
+        and _get_dmp_d(connection).get(get_reference_pid())
         is not None
     )
 
@@ -555,17 +647,14 @@ def init_connection_extra_data(
     """
     if not is_globally_init(connection):
         if connection is connections:
-            connection.django_monkey_patches_reference_pids = {}
-        connection.django_monkey_patches_dict = {}
-        connection.django_monkey_patches_stash_stack = {}
+            setattr(connection, SN1, {})
+        setattr(connection, SN2, {})
+        setattr(connection, SN3, {})
 
-    connection.django_monkey_patches_dict[get_reference_pid()] = (
-        get_extra_data_template_callback()
-    )
+    pid = get_reference_pid()
+    _get_dmp_d(connection)[pid] = get_extra_data_template_callback()
     if empty_stash_stack or get_connection_stack(connection) is None:
-        connection.django_monkey_patches_stash_stack[
-            get_reference_pid()
-        ] = get_managed_list(manager)
+        _get_dmp_ss(connection)[pid] = get_managed_list(manager)
 
 
 # pylint: disable-next=too-many-arguments
@@ -718,11 +807,10 @@ def insert_in_connections_extra_data_v1(
     The entry-point function to insert query data in relevant dicts.
     It should be your default POST_EXECUTION_CALLBACK.
     """
+    pid = get_reference_pid()
     all_dicts = [
-        connections.django_monkey_patches_dict[get_reference_pid()],
-        context["connection"].django_monkey_patches_dict[
-            get_reference_pid()
-        ],
+        _get_dmp_d(connections)[pid],
+        _get_dmp_d(context["connection"])[pid],
     ]
     data = {
         "execute": execute,
@@ -748,17 +836,12 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
     in all relevant dicts.
     """
     # Filtering part -------------------------------------------------
-    if data["duration"] is not None:
+    duration = data["duration"]
+    if duration is not None:
         # /!\ check list: you did activate TIME_QUERIES?
-        if (
-            extra_data_dict["min_seconds_threshold"]
-            > data["duration"]
-        ):
+        if extra_data_dict["min_seconds_threshold"] > duration:
             return
-        if (
-            extra_data_dict["max_seconds_threshold"]
-            < data["duration"]
-        ):
+        if extra_data_dict["max_seconds_threshold"] < duration:
             return
 
     filter_callback = extra_data_dict["filter_callback"]
@@ -783,13 +866,13 @@ def insert_in_extra_data_dict_v1(extra_data_dict, data):
                     extra_data_dict, data
                 )
         extra_data_dict["query_list"].append(local_data)
-    if data["duration"] is not None:
-        extra_data_dict["total_duration"] += data["duration"]
+    if duration is not None:
+        extra_data_dict["total_duration"] += duration
         extra_data_dict["min_duration"] = min(
-            extra_data_dict["min_duration"], data["duration"]
+            extra_data_dict["min_duration"], duration
         )
         extra_data_dict["max_duration"] = max(
-            extra_data_dict["max_duration"], data["duration"]
+            extra_data_dict["max_duration"], duration
         )
     insertion_callback = extra_data_dict["insertion_callback"]
     if insertion_callback is not None:
@@ -835,13 +918,10 @@ def synthetize_connections_extra_data_v1():
     The entry-point function to call synthetize_extra_data_dict_v1()
     on all root extra data dicts.
     """
-    extra_data_dicts = [
-        connections.django_monkey_patches_dict[get_reference_pid()]
-    ]
+    pid = get_reference_pid()
+    extra_data_dicts = [_get_dmp_d(connections)[pid]]
     extra_data_dicts.extend(
-        connections[connection_key].django_monkey_patches_dict[
-            get_reference_pid()
-        ]
+        _get_dmp_d(connections[connection_key])[pid]
         for connection_key in connections
     )
     for extra_data_dict in extra_data_dicts:
@@ -943,16 +1023,11 @@ def stash_extra_data_dict(
     if not is_locally_init(connection) and init_if_non_locally_init:
         reinit_after_stash(connection)
         return
-    connection.django_monkey_patches_stash_stack[
-        get_reference_pid()
-    ].append(
-        connection.django_monkey_patches_dict[get_reference_pid()]
-    )
+    pid = get_reference_pid()
+    _get_dmp_ss(connection)[pid].append(_get_dmp_d(connection)[pid])
 
     if reinit_after_stash is None:
-        connection.django_monkey_patches_dict[get_reference_pid()] = (
-            None
-        )
+        _get_dmp_d(connection)[pid] = None
     else:
         reinit_after_stash(connection)
 
@@ -1101,9 +1176,7 @@ def pop_extra_data_dict(connection, ignore_empty_stack=False):
     stash_stack = get_connection_stack(connection)
     if ignore_empty_stack and len(stash_stack) == 0:
         return
-    connection.django_monkey_patches_dict[get_reference_pid()] = (
-        stash_stack.pop()
-    )
+    _get_dmp_d(connection)[get_reference_pid()] = stash_stack.pop()
 
 
 def pop_extra_data_dicts(ignore_empty_stack=False):
@@ -1133,20 +1206,33 @@ def apply_patch_rq_v1():
 
     original_fork_work_horse = Worker.fork_work_horse
     original_main_work_horse = Worker.main_work_horse
+    original_perform_job = Worker.perform_job
 
     def patched_fork_work_horse(self, job, queue):
         job.reference_pid = os.getpid()
         return original_fork_work_horse(self, job, queue)
 
     def patched_main_work_horse(self, job, queue):
-        connections.django_monkey_patches_reference_pids[
-            os.getpid()
-        ] = job.reference_pid
+        _get_dmp_rp(connections)[os.getpid()] = job.reference_pid
         return original_main_work_horse(self, job, queue)
+
+    def patched_perform_job(self, job, queue):
+        result = self.perform_job(job, queue)
+        pid = os.getpid()
+        if hasattr(connections, SN1):
+            rp = _get_dmp_rp(connections)
+            if rp.get(pid):
+                del rp[pid]
+        return result
 
     Worker.fork_work_horse = patched_fork_work_horse
     Worker.main_work_horse = patched_main_work_horse
-    return (original_fork_work_horse, original_main_work_horse)
+    Worker.perform_job = patched_perform_job
+    return (
+        original_fork_work_horse,
+        original_main_work_horse,
+        original_perform_job,
+    )
 
 
 patch_rq_v1 = apply_patch_rq_v1
@@ -1192,15 +1278,14 @@ patch_rq_v1 = apply_patch_rq_v1
 #
 #     def __call__(self, request):
 #         init_connections_extra_data_v1()
-#         connection.django_monkey_patches_dict[get_reference_pid()][
-#             "allocated_subsets_extra_data"
-#         ] = {"per_sql_signature_v1": {},}
-#         connection.django_monkey_patches_dict[get_reference_pid()][
-#             "allocated_subsets_key_callback"
-#         ] = {"per_sql_signature_v1": get_sql_signature_v1,}
-#         connection.django_monkey_patches_dict[get_reference_pid()][
-#             "allocated_subsets_init_callback"
-#         ] = {
+#         dmp_dict = _get_dmp_d(connection)[get_reference_pid()]
+#         dmp_dict["allocated_subsets_extra_data"] = {
+#             "per_sql_signature_v1": {},
+#         }
+#         dmp_dict["allocated_subsets_key_callback"] = {
+#             "per_sql_signature_v1": get_sql_signature_v1,
+#         }
+#         dmp_dict["allocated_subsets_init_callback"] = {
 #             "per_sql_signature_v1": (
 #                 lambda x, y: (
 #                     get_extra_data_template_for_set_of_queries_v1(
@@ -1221,9 +1306,7 @@ patch_rq_v1 = apply_patch_rq_v1
 #             ),
 #         }
 #
-#         connection.django_monkey_patches_dict[get_reference_pid()][
-#             "bottom_up_post_processing_callback"
-#         ] = (
+#         dmp_dict["bottom_up_post_processing_callback"] = (
 #             lambda x: (
 #               apply_reorder_dict_by_total_duration_of_sub_dicts_to(
 #                 x["allocated_subsets_extra_data"],
@@ -1236,13 +1319,13 @@ patch_rq_v1 = apply_patch_rq_v1
 #             response = self.get_response(request)
 #             synthetize_connections_extra_data_v1()
 #             # dump to file or log:
-#             # connections.django_monkey_patches_dict[
+#             # _get_dmp_d(connections)[
 #             #     get_reference_pid()
 #             # ]
 #             # for connection_key in connections:
 #             #     some_connection = connections[connection_key]
 #             #     # dump to file or log:
-#             #     # some_connection.django_monkey_patches_dict[
+#             #     # some__get_dmp_d(connection)[
 #             #     #     get_reference_pid()
 #             #     # ]
 #             return response
