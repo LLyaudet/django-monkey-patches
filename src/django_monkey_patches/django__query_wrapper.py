@@ -1173,10 +1173,11 @@ def pop_extra_data_dict(connection, ignore_empty_stack=False):
     Pop last dict in django_monkey_patches_stash_stack
     to django_monkey_patches_dict of connection.
     """
-    stash_stack = get_connection_stack(connection)
+    pid = get_reference_pid()
+    stash_stack = _get_dmp_ss(connection)[pid]
     if ignore_empty_stack and len(stash_stack) == 0:
         return
-    _get_dmp_d(connection)[get_reference_pid()] = stash_stack.pop()
+    _get_dmp_d(connection)[pid] = stash_stack.pop()
 
 
 def pop_extra_data_dicts(ignore_empty_stack=False):
