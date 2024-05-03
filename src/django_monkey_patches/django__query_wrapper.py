@@ -1245,15 +1245,21 @@ patch_rq_v1 = apply_patch_rq_v1
 #
 # from contextlib import ExitStack
 #
+# from django.db import connections
 # from django_monkey_patches import django__query_wrapper
 # from django_monkey_patches.django__query_wrapper import (
+#     _get_dmp_d,
 #     apply_reorder_dict_by_total_duration_of_sub_dicts_to,
 #     custom_query_wrapper_v1,
 #     get_extra_data_template_for_set_of_queries_v1,
+#     get_full_query_v1,
+#     get_light_call_stack_v1,
+#     get_reference_pid,
 #     get_sql_signature_v1,
 #     init_connections_extra_data_v1,
 #     insert_in_connections_extra_data_v1,
 #     synthetize_connections_extra_data_v1,
+#     wrap_connections,
 # )
 #
 # # /!\ Beware of double counting that may occur when you use
@@ -1278,7 +1284,7 @@ patch_rq_v1 = apply_patch_rq_v1
 #
 #     def __call__(self, request):
 #         init_connections_extra_data_v1()
-#         dmp_dict = _get_dmp_d(connection)[get_reference_pid()]
+#         dmp_dict = _get_dmp_d(connections)[get_reference_pid()]
 #         dmp_dict["allocated_subsets_extra_data"] = {
 #             "per_sql_signature_v1": {},
 #         }
