@@ -1218,7 +1218,7 @@ def apply_patch_rq_v1():
         return original_main_work_horse(self, job, queue)
 
     def patched_perform_job(self, job, queue):
-        result = self.perform_job(job, queue)
+        result = original_perform_job(self, job, queue)
         pid = os.getpid()
         if hasattr(connections, SN1):
             rp = _get_dmp_rp(connections)
@@ -1249,9 +1249,9 @@ patch_rq_v1 = apply_patch_rq_v1
 # from django.db import connections
 # from django_monkey_patches import django__query_wrapper
 # from django_monkey_patches.django__query_wrapper import (
-#     _get_dmp_d,
 #     apply_reorder_dict_by_total_duration_of_sub_dicts_to,
 #     custom_query_wrapper_v1,
+#     get_connection_dict,
 #     get_extra_data_template_for_set_of_queries_v1,
 #     get_full_query_v1,
 #     get_light_call_stack_v1,
@@ -1285,7 +1285,7 @@ patch_rq_v1 = apply_patch_rq_v1
 #
 #     def __call__(self, request):
 #         init_connections_extra_data_v1()
-#         dmp_dict = _get_dmp_d(connections)[get_reference_pid()]
+#         dmp_dict = get_connection_dict(connections)
 #         dmp_dict["allocated_subsets_extra_data"] = {
 #             "per_sql_signature_v1": {},
 #         }
@@ -1326,13 +1326,9 @@ patch_rq_v1 = apply_patch_rq_v1
 #             response = self.get_response(request)
 #             synthetize_connections_extra_data_v1()
 #             # dump to file or log:
-#             # _get_dmp_d(connections)[
-#             #     get_reference_pid()
-#             # ]
+#             # get_connection_dict(connections)
 #             # for connection_key in connections:
 #             #     some_connection = connections[connection_key]
 #             #     # dump to file or log:
-#             #     # some__get_dmp_d(connection)[
-#             #     #     get_reference_pid()
-#             #     # ]
+#             #     # get_connection_dict(some_connection)
 #             return response
