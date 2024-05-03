@@ -517,17 +517,17 @@ def get_connection_stack(connection):
     )
 
 
-def is_globally_init():
+def is_globally_init(connection):
     """
     Since Django connections are shared between processes
     in many cases,
     tell if these connections already have the dicts linked
     to this patch.
     """
-    return hasattr(connections, "django_monkey_patches_dict")
+    return hasattr(connection, "django_monkey_patches_dict")
 
 
-def is_locally_init():
+def is_locally_init(connection):
     """
     Since Django connections are shared between processes
     in many cases,
@@ -536,11 +536,90 @@ def is_locally_init():
     And test if these dicts have values for the current reference_pid.
     """
     return (
-        is_globally_init()
-        and connections.django_monkey_patches_dict.get(
+        is_globally_init(connection)
+        and connection.django_monkey_patches_dict.get(
             get_reference_pid()
         )
         is not None
+    )
+
+
+def init_connection_extra_data(
+    connection,
+    get_extra_data_template_callback,
+    manager=None,
+    empty_stash_stack=False,
+):
+    """
+    An inner function to init one connection.
+    """
+    if not is_globally_init(connection):
+        if connection is connections:
+            connection.django_monkey_patches_reference_pids = {}
+        connection.django_monkey_patches_dict = {}
+        connection.django_monkey_patches_stash_stack = {}
+
+    connection.django_monkey_patches_dict[get_reference_pid()] = (
+        get_extra_data_template_callback()
+    )
+    if empty_stash_stack or get_connection_stack(connection) is None:
+        connection.django_monkey_patches_stash_stack[
+            get_reference_pid()
+        ] = get_managed_list(manager)
+
+
+# pylint: disable-next=too-many-arguments
+def init_connection_extra_data_v1(
+    connection,
+    manager=None,
+    empty_stash_stack=False,
+    query_fields=None,
+    min_seconds_threshold=0,
+    max_seconds_threshold=float("inf"),
+    filter_callback=None,
+    insertion_callback=None,
+    subsets_extra_data=None,
+    allocated_subsets_extra_data=None,
+    allocated_subsets_key_callback=None,
+    allocated_subsets_init_callback=None,
+    top_down_post_processing_callback=None,
+    bottom_up_post_processing_callback=None,
+):
+    """
+    A simple default function providing the
+    get_extra_data_template_callback argument
+    to init_connection_extra_data().
+    """
+
+    def lambda_get_extra_data_template_for_set_of_queries_v1():
+        return get_extra_data_template_for_set_of_queries_v1(
+            query_fields=query_fields,
+            min_seconds_threshold=min_seconds_threshold,
+            max_seconds_threshold=max_seconds_threshold,
+            filter_callback=filter_callback,
+            insertion_callback=insertion_callback,
+            subsets_extra_data=subsets_extra_data,
+            allocated_subsets_extra_data=allocated_subsets_extra_data,
+            allocated_subsets_key_callback=(
+                allocated_subsets_key_callback
+            ),
+            allocated_subsets_init_callback=(
+                allocated_subsets_init_callback
+            ),
+            top_down_post_processing_callback=(
+                top_down_post_processing_callback
+            ),
+            bottom_up_post_processing_callback=(
+                bottom_up_post_processing_callback
+            ),
+            manager=manager,
+        )
+
+    init_connection_extra_data(
+        connection,
+        lambda_get_extra_data_template_for_set_of_queries_v1,
+        manager=manager,
+        empty_stash_stack=empty_stash_stack,
     )
 
 
@@ -553,36 +632,20 @@ def init_connections_extra_data(
     You should call this function or a custom one
     before using the custom query wrapper.
     """
-    if not is_globally_init():
-        connections.django_monkey_patches_reference_pids = {}
-        connections.django_monkey_patches_dict = {}
-        connections.django_monkey_patches_stash_stack = {}
-        for connection_key in connections:
-            connection = connections[connection_key]
-            connection.django_monkey_patches_reference_pids = {}
-            connection.django_monkey_patches_dict = {}
-            connection.django_monkey_patches_stash_stack = {}
-
-    connections.django_monkey_patches_dict[get_reference_pid()] = (
-        get_extra_data_template_callback()
+    init_connection_extra_data(
+        connections,
+        get_extra_data_template_callback,
+        manager=manager,
+        empty_stash_stack=empty_stash_stack,
     )
-    if empty_stash_stack or get_connection_stack(connections) is None:
-        connections.django_monkey_patches_stash_stack[
-            get_reference_pid()
-        ] = get_managed_list(manager)
-
     for connection_key in connections:
         connection = connections[connection_key]
-        connection.django_monkey_patches_dict[get_reference_pid()] = (
-            get_extra_data_template_callback()
+        init_connection_extra_data(
+            connection,
+            get_extra_data_template_callback,
+            manager=manager,
+            empty_stash_stack=empty_stash_stack,
         )
-        if (
-            empty_stash_stack
-            or get_connection_stack(connection) is None
-        ):
-            connection.django_monkey_patches_stash_stack[
-                get_reference_pid()
-            ] = get_managed_list(manager)
 
 
 # pylint: disable-next=too-many-arguments
@@ -868,35 +931,112 @@ def wrap_connections(
         )
 
 
-def stash_extra_data_dicts(reinit_after_stash=None):
+def stash_extra_data_dict(
+    connection,
+    reinit_after_stash=None,
+    init_if_non_locally_init=False,
+):
+    """
+    Stash connection django_monkey_patches_dict
+    in django_monkey_patches_stash_stack.
+    """
+    if not is_locally_init(connection) and init_if_non_locally_init:
+        reinit_after_stash(connection)
+        return
+    connection.django_monkey_patches_stash_stack[
+        get_reference_pid()
+    ].append(
+        connection.django_monkey_patches_dict[get_reference_pid()]
+    )
+
+    if reinit_after_stash is None:
+        connection.django_monkey_patches_dict[
+            get_reference_pid()
+        ] = None
+    else:
+        reinit_after_stash(connection)
+
+
+# pylint: disable-next=too-many-arguments
+def stash_extra_data_dict_and_reinit_v1(
+    connection,
+    manager=None,
+    query_fields=None,
+    min_seconds_threshold=0,
+    max_seconds_threshold=float("inf"),
+    filter_callback=None,
+    insertion_callback=None,
+    subsets_extra_data=None,
+    allocated_subsets_extra_data=None,
+    allocated_subsets_key_callback=None,
+    allocated_subsets_init_callback=None,
+    top_down_post_processing_callback=None,
+    bottom_up_post_processing_callback=None,
+    init_if_non_locally_init=False,
+):
+    """
+    Stash connection django_monkey_patches_dict
+    in django_monkey_patches_stash_stack,
+    and apply a reinit using default init function.
+    """
+
+    def lambda_init_connection_extra_data_v1(connection_):
+        init_connection_extra_data_v1(
+            connection_,
+            manager=manager,
+            empty_stash_stack=False,
+            query_fields=query_fields,
+            min_seconds_threshold=min_seconds_threshold,
+            max_seconds_threshold=max_seconds_threshold,
+            filter_callback=filter_callback,
+            insertion_callback=insertion_callback,
+            subsets_extra_data=subsets_extra_data,
+            allocated_subsets_extra_data=allocated_subsets_extra_data,
+            allocated_subsets_key_callback=(
+                allocated_subsets_key_callback
+            ),
+            allocated_subsets_init_callback=(
+                allocated_subsets_init_callback
+            ),
+            top_down_post_processing_callback=(
+                top_down_post_processing_callback
+            ),
+            bottom_up_post_processing_callback=(
+                bottom_up_post_processing_callback
+            ),
+        )
+
+    stash_extra_data_dict(
+        connection,
+        reinit_after_stash=lambda_init_connection_extra_data_v1,
+        init_if_non_locally_init=init_if_non_locally_init,
+    )
+
+
+def stash_extra_data_dicts(
+    # These two arguments should be mutually exclusive.
+    local_reinit_after_stash=None,
+    global_reinit_after_stash=None,
+    init_if_non_locally_init=False,
+):
     """
     Stash current django_monkey_patches_dicts
     in django_monkey_patches_stash_stacks.
     """
-    connections.django_monkey_patches_stash_stack[
-        get_reference_pid()
-    ].append(
-        connections.django_monkey_patches_dict[get_reference_pid()]
+    stash_extra_data_dict(
+        connections,
+        reinit_after_stash=local_reinit_after_stash,
+        init_if_non_locally_init=init_if_non_locally_init,
     )
-
-    if reinit_after_stash is None:
-        connections.django_monkey_patches_dict[
-            get_reference_pid()
-        ] = None
     for connection_key in connections:
         connection = connections[connection_key]
-        connection.django_monkey_patches_stash_stack[
-            get_reference_pid()
-        ].append(
-            connection.django_monkey_patches_dict[get_reference_pid()]
+        stash_extra_data_dict(
+            connection,
+            reinit_after_stash=local_reinit_after_stash,
+            init_if_non_locally_init=init_if_non_locally_init,
         )
-        if reinit_after_stash is None:
-            connection.django_monkey_patches_dict[
-                get_reference_pid()
-            ] = None
-
-    if reinit_after_stash:
-        reinit_after_stash()
+    if global_reinit_after_stash:
+        global_reinit_after_stash()
 
 
 # pylint: disable-next=too-many-arguments
@@ -913,6 +1053,7 @@ def stash_extra_data_dicts_and_reinit_v1(
     allocated_subsets_init_callback=None,
     top_down_post_processing_callback=None,
     bottom_up_post_processing_callback=None,
+    init_if_non_locally_init=False,
 ):
     """
     Stash current django_monkey_patches_dicts
@@ -920,8 +1061,9 @@ def stash_extra_data_dicts_and_reinit_v1(
     and apply a reinit using default init functions.
     """
 
-    def lambda_init_connections_extra_data_v1():
-        init_connections_extra_data_v1(
+    def lambda_init_connection_extra_data_v1(connection):
+        init_connection_extra_data_v1(
+            connection,
             manager=manager,
             empty_stash_stack=False,
             query_fields=query_fields,
@@ -946,26 +1088,38 @@ def stash_extra_data_dicts_and_reinit_v1(
         )
 
     stash_extra_data_dicts(
-        reinit_after_stash=lambda_init_connections_extra_data_v1
+        local_reinit_after_stash=lambda_init_connection_extra_data_v1,
+        init_if_non_locally_init=init_if_non_locally_init,
     )
 
 
-def pop_extra_data_dicts():
+def pop_extra_data_dict(connection, ignore_empty_stack=False):
+    """
+    Pop last dict in django_monkey_patches_stash_stack
+    to django_monkey_patches_dict of connection.
+    """
+    stash_stack = get_connection_stack(connection)
+    if ignore_empty_stack and len(stash_stack) == 0:
+        return
+    connection.django_monkey_patches_dict[get_reference_pid()] = (
+        stash_stack.pop()
+    )
+
+
+def pop_extra_data_dicts(ignore_empty_stack=False):
     """
     Pop last dicts in django_monkey_patches_stash_stacks
     to django_monkey_patches_dicts.
     """
-    connections.django_monkey_patches_dict[get_reference_pid()] = (
-        connections.django_monkey_patches_stash_stack[
-            get_reference_pid()
-        ].pop()
+    pop_extra_data_dict(
+        connections,
+        ignore_empty_stack=ignore_empty_stack,
     )
     for connection_key in connections:
         connection = connections[connection_key]
-        connection.django_monkey_patches_dict[get_reference_pid()] = (
-            connection.django_monkey_patches_stash_stack[
-                get_reference_pid()
-            ].pop()
+        pop_extra_data_dict(
+            connection,
+            ignore_empty_stack=ignore_empty_stack,
         )
 
 
